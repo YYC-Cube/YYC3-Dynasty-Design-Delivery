@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Outlet } from 'react-router';
 import { Navigation } from './Navigation';
 import { AIAssistantHub } from './AIAssistantHub';
@@ -15,7 +16,17 @@ export function Root() {
           <div className="min-h-screen bg-[var(--color-bg-primary)] font-sans text-[var(--color-text-primary)] selection:bg-[var(--color-accent-gold)]/30">
             <Navigation />
             <main className="min-h-screen pt-14 pb-10">
-              <Outlet />
+              <Suspense
+                fallback={
+                  <div className="flex h-[60vh] items-center justify-center">
+                    <span className="font-serif text-sm text-[var(--color-text-secondary)]">
+                      加载中…
+                    </span>
+                  </div>
+                }
+              >
+                <Outlet />
+              </Suspense>
             </main>
             <AIAssistantHub />
           </div>

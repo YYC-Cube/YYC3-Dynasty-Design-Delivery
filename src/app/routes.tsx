@@ -1,38 +1,89 @@
 import { createBrowserRouter } from 'react-router';
 import { Root } from './components/Root';
-import { WelcomePage } from './pages/WelcomePage';
-import { CourtHall } from './pages/CourtHall';
-import { EdictBoard } from './pages/EdictBoard';
-import { ArchiveBoard } from './pages/ArchiveBoard';
-import { TimelinePage } from './pages/TimelinePage';
-import { TaishiMonitor } from './pages/TaishiMonitor';
-import { PlaceholderPage } from './pages/PlaceholderPage';
-import { HonorsPage } from './pages/HonorsPage';
-import { DashboardPage } from './dashboard/DashboardPage';
+
+// ── Route-level lazy loading ──────────────────────────────────────────────
+// Each page is split into its own chunk via React Router v7's native `lazy`
+// property. This defers Suspense handling to the router (no manual Suspense
+// boundaries needed) and reduces the initial bundle to the critical path
+// (Root shell only). Heavy deps (recharts, react-dnd, recharts) are isolated
+// into per-route chunks loaded on-demand.
 
 export const router = createBrowserRouter([
   {
     path: '/',
     Component: Root,
     children: [
-      { index: true, Component: WelcomePage },
-      { path: 'court', Component: CourtHall },
-      { path: 'edict', Component: EdictBoard },
-      { path: 'edict/:id', Component: EdictBoard },
-      { path: 'archive', Component: ArchiveBoard },
-      { path: 'timeline', Component: TimelinePage },
-      { path: 'monitor', Component: TaishiMonitor },
-      { path: 'honors', Component: HonorsPage },
-      { path: 'skills', Component: PlaceholderPage },
-      { path: 'workflow', Component: PlaceholderPage },
-      { path: 'bridge', Component: PlaceholderPage },
-      { path: 'hr', Component: PlaceholderPage },
-      { path: 'department/:id', Component: PlaceholderPage },
-      { path: 'settings', Component: PlaceholderPage },
-      { path: '*', Component: PlaceholderPage },
+      {
+        index: true,
+        lazy: () => import('./pages/WelcomePage').then((m) => ({ Component: m.WelcomePage })),
+      },
+      {
+        path: 'court',
+        lazy: () => import('./pages/CourtHall').then((m) => ({ Component: m.CourtHall })),
+      },
+      {
+        path: 'edict',
+        lazy: () => import('./pages/EdictBoard').then((m) => ({ Component: m.EdictBoard })),
+      },
+      {
+        path: 'edict/:id',
+        lazy: () => import('./pages/EdictBoard').then((m) => ({ Component: m.EdictBoard })),
+      },
+      {
+        path: 'archive',
+        lazy: () => import('./pages/ArchiveBoard').then((m) => ({ Component: m.ArchiveBoard })),
+      },
+      {
+        path: 'timeline',
+        lazy: () => import('./pages/TimelinePage').then((m) => ({ Component: m.TimelinePage })),
+      },
+      {
+        path: 'monitor',
+        lazy: () => import('./pages/TaishiMonitor').then((m) => ({ Component: m.TaishiMonitor })),
+      },
+      {
+        path: 'honors',
+        lazy: () => import('./pages/HonorsPage').then((m) => ({ Component: m.HonorsPage })),
+      },
+      {
+        path: 'skills',
+        lazy: () =>
+          import('./pages/PlaceholderPage').then((m) => ({ Component: m.PlaceholderPage })),
+      },
+      {
+        path: 'workflow',
+        lazy: () =>
+          import('./pages/PlaceholderPage').then((m) => ({ Component: m.PlaceholderPage })),
+      },
+      {
+        path: 'bridge',
+        lazy: () =>
+          import('./pages/PlaceholderPage').then((m) => ({ Component: m.PlaceholderPage })),
+      },
+      {
+        path: 'hr',
+        lazy: () =>
+          import('./pages/PlaceholderPage').then((m) => ({ Component: m.PlaceholderPage })),
+      },
+      {
+        path: 'department/:id',
+        lazy: () =>
+          import('./pages/PlaceholderPage').then((m) => ({ Component: m.PlaceholderPage })),
+      },
+      {
+        path: 'settings',
+        lazy: () =>
+          import('./pages/PlaceholderPage').then((m) => ({ Component: m.PlaceholderPage })),
+      },
+      {
+        path: '*',
+        lazy: () =>
+          import('./pages/PlaceholderPage').then((m) => ({ Component: m.PlaceholderPage })),
+      },
     ],
   },
-  // Standalone fullscreen command-center layout (own header, not under Root/Navigation).
-  // Wraps its own WorkflowProvider + DndProvider internally.
-  { path: '/dashboard', Component: DashboardPage },
+  {
+    path: '/dashboard',
+    lazy: () => import('./dashboard/DashboardPage').then((m) => ({ Component: m.DashboardPage })),
+  },
 ]);

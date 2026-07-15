@@ -50,4 +50,29 @@ export default defineConfig({
       deny: ['docs/YYC3-AI-Dev'],
     },
   },
+
+  build: {
+    rollupOptions: {
+      output: {
+        // Split large vendor libraries into separate chunks for better
+        // caching and parallel download. Route-level lazy loading already
+        // splits by route; this further isolates heavy shared deps.
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router'],
+          'vendor-radix': [
+            '@radix-ui/react-dialog',
+            '@radix-ui/react-dropdown-menu',
+            '@radix-ui/react-popover',
+            '@radix-ui/react-select',
+            '@radix-ui/react-tabs',
+            '@radix-ui/react-tooltip',
+            '@radix-ui/react-accordion',
+          ],
+          'vendor-recharts': ['recharts'],
+          'vendor-dnd': ['react-dnd', 'react-dnd-html5-backend'],
+          'vendor-motion': ['motion'],
+        },
+      },
+    },
+  },
 });

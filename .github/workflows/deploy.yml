@@ -56,6 +56,9 @@ jobs:
       - name: Circular dependency scan
         run: pnpm madge
 
+      - name: Unit tests
+        run: pnpm test
+
       - name: Build
         run: pnpm build
 
