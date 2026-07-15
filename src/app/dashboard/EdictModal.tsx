@@ -2,12 +2,14 @@ import React from 'react';
 import { X, CheckCircle2, Circle } from 'lucide-react';
 import { TokenButton } from '../components/ui/TokenButton';
 import { useModalDismiss } from '../components/ui/useModalDismiss';
+import { useTranslation } from '@yyc3/i18n-react';
 
 interface EdictModalProps {
   onClose: () => void;
 }
 
 export function EdictModal({ onClose }: EdictModalProps) {
+  const { t } = useTranslation();
   const onBackdropClick = useModalDismiss(onClose);
 
   return (
@@ -29,7 +31,7 @@ export function EdictModal({ onClose }: EdictModalProps) {
           <div className="relative z-10 flex h-[40px] items-center justify-between border-b-2 border-[var(--color-accent-gold)]/50 bg-[var(--color-edict-sky)] px-6 shadow-sm">
             <div className="flex items-center space-x-3">
               <div className="rounded-sm bg-[var(--color-accent-gold)] px-2 py-0.5 text-xs font-bold tracking-widest text-[var(--color-edict-sky)]">
-                敕书
+                {t('edict.type.敕书')}
               </div>
               <span className="font-mono text-xs text-white/80">NO. ED-2026-004</span>
             </div>
@@ -41,26 +43,22 @@ export function EdictModal({ onClose }: EdictModalProps) {
           {/* Content Area */}
           <div className="relative z-10 flex-1 overflow-y-auto px-12 py-8">
             <h2 className="mb-8 text-center font-serif text-2xl font-bold tracking-widest text-[var(--color-edict-ink)]">
-              关于工部流水线扩容之敕书
+              {t('dashboard.edictTitle')}
             </h2>
 
             <div className="space-y-4 text-justify font-serif text-base leading-relaxed text-[var(--color-edict-ink)]">
-              <p>门下：</p>
-              <p className="indent-8">
-                近日工部CI/CD衙署并发骤增，现存令牌调度不堪重负。特命尚书省统筹，调拨户部算力资源五十，暂借工部周转。
-              </p>
-              <p className="indent-8">
-                着中书省草拟扩容方案，门下省查验合规。限三日内完成，不得有误。
-              </p>
-              <p className="indent-8">钦此。</p>
+              <p>{t('dashboard.edictGreeting')}：</p>
+              <p className="indent-8">{t('dashboard.edictBody1')}</p>
+              <p className="indent-8">{t('dashboard.edictBody2')}</p>
+              <p className="indent-8">{t('dashboard.edictClosing')}</p>
             </div>
 
             {/* Seals Area */}
             <div className="mt-16 flex justify-center space-x-6 border-t border-[var(--color-edict-ink)]/20 pt-8">
-              <Seal active name="中书省印" type="blue" />
-              <Seal active name="门下省印" type="gold" />
-              <Seal name="尚书省印" type="green" />
-              <Seal name="皇帝行玺" type="red" />
+              <Seal active name={t('dashboard.sealZhongshu')} type="blue" />
+              <Seal active name={t('dashboard.sealMenxia')} type="gold" />
+              <Seal name={t('dashboard.sealShangshu')} type="green" />
+              <Seal name={t('dashboard.sealEmperor')} type="red" />
             </div>
           </div>
 
@@ -72,14 +70,14 @@ export function EdictModal({ onClose }: EdictModalProps) {
               onClick={onClose}
               className="border-white/20 text-white"
             >
-              驳回修改
+              {t('dashboard.rejectEdit')}
             </TokenButton>
             <TokenButton
               variant="primary"
               size="sm"
               className="border-[var(--color-accent-gold)] bg-[var(--color-accent-gold)] text-[var(--color-edict-sky)] hover:bg-[var(--color-accent-gold)]/90"
             >
-              加盖尚书印
+              {t('dashboard.applySeal')}
             </TokenButton>
           </div>
         </div>
@@ -87,20 +85,55 @@ export function EdictModal({ onClose }: EdictModalProps) {
         {/* Right Sidebar: Timeline */}
         <div className="relative ml-4 flex w-[180px] flex-col rounded border border-[var(--color-text-secondary)]/20 bg-[var(--color-bg-secondary)] p-4 before:absolute before:top-1/2 before:left-[-16px] before:w-4 before:border-t before:border-[var(--color-text-secondary)]/30">
           <h3 className="mb-6 border-b border-[var(--color-text-secondary)]/30 pb-2 font-serif text-sm text-[var(--color-accent-gold)]">
-            流转轨迹
+            {t('dashboard.flowTrace')}
           </h3>
 
           <div className="relative flex flex-1 flex-col space-y-6">
             {/* Connecting line */}
             <div className="absolute top-2 bottom-6 left-[5px] w-[2px] bg-[var(--color-text-secondary)]/20" />
 
-            <TimelineNode title="降旨" dept="皇帝" time="08:00" status="completed" />
-            <TimelineNode title="宣付" dept="太子" time="08:05" status="completed" />
-            <TimelineNode title="草制" dept="中书省" time="08:45" status="completed" />
-            <TimelineNode title="审覆" dept="门下省" time="09:30" status="completed" />
-            <TimelineNode title="签押" dept="尚书省" time="--" status="current" />
-            <TimelineNode title="执行" dept="工部" time="--" status="pending" />
-            <TimelineNode title="覆奏" dept="定鼎门" time="--" status="pending" />
+            <TimelineNode
+              title={t('dashboard.stepDecree')}
+              dept={t('welcome.roles.emperor')}
+              time="08:00"
+              status="completed"
+            />
+            <TimelineNode
+              title={t('dashboard.stepPromulgate')}
+              dept={t('welcome.roles.prince')}
+              time="08:05"
+              status="completed"
+            />
+            <TimelineNode
+              title={t('dashboard.stepDraft')}
+              dept={t('court.zhongshuNode')}
+              time="08:45"
+              status="completed"
+            />
+            <TimelineNode
+              title={t('dashboard.stepReview')}
+              dept={t('court.menxiaNode')}
+              time="09:30"
+              status="completed"
+            />
+            <TimelineNode
+              title={t('dashboard.stepSign')}
+              dept={t('court.shangshuNode')}
+              time="--"
+              status="current"
+            />
+            <TimelineNode
+              title={t('dashboard.stepExecute')}
+              dept={t('court.ministries.gong')}
+              time="--"
+              status="pending"
+            />
+            <TimelineNode
+              title={t('dashboard.stepReport')}
+              dept={t('court.dingdingNode')}
+              time="--"
+              status="pending"
+            />
           </div>
         </div>
       </div>
@@ -126,7 +159,7 @@ function Seal({
 
   return (
     <div
-      className={`relative flex h-16 w-16 items-center justify-center rounded-sm border-2 ${active ? `${colors[type]} bg-[${type === 'red' ? 'var(--color-accent-vermillion)' : type === 'gold' ? 'var(--color-accent-gold)' : 'var(--color-ministry-azure)'}]/10` : 'border-gray-400/50 text-gray-400/50'} transition-all`}
+      className={`relative flex h-16 w-16 items-center justify-center rounded-sm border-2 ${active ? `${colors[type]} bg-[${type === 'red' ? 'var(--color-accent-vermillion)' : type === 'gold' ? 'var(--color-accent-gold)' : 'var(--color-ministry-azure)'}']/10` : 'border-gray-400/50 text-gray-400/50'} transition-all`}
     >
       {active && (
         <div

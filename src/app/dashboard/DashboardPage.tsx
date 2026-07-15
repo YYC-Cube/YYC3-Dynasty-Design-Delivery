@@ -8,96 +8,103 @@ import { EdictModal } from './EdictModal';
 import { WorkflowProvider } from '../store/WorkflowContext';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
-import { I18nProvider } from '@yyc3/i18n-react';
+import { I18nProvider, useTranslation } from '@yyc3/i18n-react';
 import { i18nEngine } from '@/i18n';
 
-const HEADER_LINKS = [
-  { name: '藏经阁', path: '/skills' },
-  { name: '工部作坊', path: '/workflow' },
-  { name: '旨意工坊', path: '/edict' },
-  { name: '奏折阁', path: '/archive' },
-  { name: '太史监', path: '/monitor' },
+const HEADER_LINK_KEYS = [
+  { labelKey: 'nav.skills', path: '/skills' },
+  { labelKey: 'nav.workflow', path: '/workflow' },
+  { labelKey: 'nav.edict', path: '/edict' },
+  { labelKey: 'archive.title', path: '/archive' },
+  { labelKey: 'nav.dashboard', path: '/monitor' },
 ];
 
-export function DashboardPage() {
+function DashboardContent() {
+  const { t } = useTranslation();
   const [isEdictModalOpen, setIsEdictModalOpen] = useState(false);
 
   return (
-    <I18nProvider engine={i18nEngine}>
-      <WorkflowProvider>
-        <DndProvider backend={HTML5Backend}>
-          <div className="relative flex min-h-screen flex-col overflow-hidden bg-[var(--color-bg-primary)] font-sans text-[var(--color-text-primary)]">
-            {/* Background Texture & Lines */}
-            <div className="pointer-events-none absolute inset-0 bg-[url('https://images.unsplash.com/photo-1526289034009-0240ddb68ce3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkYXJrJTIwY3liZXIlMjBhYnN0cmFjdCUyMHRleHR1cmV8ZW58MXx8fHwxNzgxMzE2NDcyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral')] bg-cover bg-center opacity-[0.03] mix-blend-screen" />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent to-[var(--color-bg-primary)]" />
+    <WorkflowProvider>
+      <DndProvider backend={HTML5Backend}>
+        <div className="relative flex min-h-screen flex-col overflow-hidden bg-[var(--color-bg-primary)] font-sans text-[var(--color-text-primary)]">
+          {/* Background Texture & Lines */}
+          <div className="pointer-events-none absolute inset-0 bg-[url('https://images.unsplash.com/photo-1526289034009-0240ddb68ce3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxkYXJrJTIwY3liZXIlMjBhYnN0cmFjdCUyMHRleHR1cmV8ZW58MXx8fHwxNzgxMzE2NDcyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral')] bg-cover bg-center opacity-[0.03] mix-blend-screen" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent to-[var(--color-bg-primary)]" />
 
-            {/* Top Header / App Bar */}
-            <header className="z-20 flex h-[64px] items-center justify-between border-b border-[var(--color-accent-gold)]/20 bg-[var(--color-bg-primary)]/80 px-6 backdrop-blur">
-              <div className="flex items-center space-x-4">
-                <h1 className="font-serif text-xl font-bold tracking-[0.2em] text-[var(--color-accent-gold)]">
-                  三省六部 · 敕令
-                </h1>
-                <span className="border-l border-[var(--color-text-secondary)]/30 pl-4 text-xs tracking-widest text-[var(--color-text-secondary)] uppercase">
-                  YanYu Edict Protocol
-                </span>
-              </div>
-              <div className="flex items-center space-x-4 text-sm font-medium">
-                <Link
-                  to="/edict"
-                  className="text-[var(--color-accent-gold)] transition-colors hover:text-[var(--color-accent-gold)]/80"
-                  title="当前：全局看板"
-                >
-                  全局看板
-                </Link>
-                {HEADER_LINKS.map((link) => (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    className="text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)]"
-                  >
-                    {link.name}
-                  </Link>
-                ))}
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2 text-xs">
-                  <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--color-accent-emerald)]" />
-                  <span className="text-[var(--color-text-secondary)]">永熙三年 · 卯时</span>
-                </div>
-                <button
-                  onClick={() => setIsEdictModalOpen(true)}
-                  className="rounded border border-[var(--color-accent-gold)]/50 px-4 py-1.5 text-xs text-[var(--color-accent-gold)] transition-colors hover:bg-[var(--color-accent-gold)]/10"
-                >
-                  查阅圣旨
-                </button>
-              </div>
-            </header>
-
-            {/* Main Content Area */}
-            <main className="relative z-10 flex flex-1 overflow-hidden p-6">
-              <LeftSidebar />
-              <CentralAxis />
-              <RightSidebar />
-            </main>
-
-            {/* Footer Signature */}
-            <div className="pointer-events-none absolute bottom-4 left-6 flex items-center gap-3 text-xs tracking-widest text-[var(--color-text-secondary)]/50">
-              <span>紫微城 · 洛阳</span>
-              <Link
-                to="/court"
-                className="pointer-events-auto flex items-center gap-1 transition-colors hover:text-[var(--color-accent-gold)]"
-                title="返回朝堂（嵌入式视图）"
-              >
-                <ArrowLeft size={12} />
-                <span>返回朝堂</span>
-              </Link>
+          {/* Top Header / App Bar */}
+          <header className="z-20 flex h-[64px] items-center justify-between border-b border-[var(--color-accent-gold)]/20 bg-[var(--color-bg-primary)]/80 px-6 backdrop-blur">
+            <div className="flex items-center space-x-4">
+              <h1 className="font-serif text-xl font-bold tracking-[0.2em] text-[var(--color-accent-gold)]">
+                {t('app.tagline')}
+              </h1>
+              <span className="border-l border-[var(--color-text-secondary)]/30 pl-4 text-xs tracking-widest text-[var(--color-text-secondary)] uppercase">
+                YanYu Edict Protocol
+              </span>
             </div>
+            <div className="flex items-center space-x-4 text-sm font-medium">
+              <Link
+                to="/edict"
+                className="text-[var(--color-accent-gold)] transition-colors hover:text-[var(--color-accent-gold)]/80"
+                title={t('dashboard.globalDashboard')}
+              >
+                {t('dashboard.globalDashboard')}
+              </Link>
+              {HEADER_LINK_KEYS.map((link) => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className="text-[var(--color-text-secondary)] transition-colors hover:text-[var(--color-text-primary)]"
+                >
+                  {t(link.labelKey)}
+                </Link>
+              ))}
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2 text-xs">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-[var(--color-accent-emerald)]" />
+                <span className="text-[var(--color-text-secondary)]">{t('app.location')}</span>
+              </div>
+              <button
+                onClick={() => setIsEdictModalOpen(true)}
+                className="rounded border border-[var(--color-accent-gold)]/50 px-4 py-1.5 text-xs text-[var(--color-accent-gold)] transition-colors hover:bg-[var(--color-accent-gold)]/10"
+              >
+                {t('dashboard.viewEdict')}
+              </button>
+            </div>
+          </header>
 
-            {/* P3 Modal */}
-            {isEdictModalOpen && <EdictModal onClose={() => setIsEdictModalOpen(false)} />}
+          {/* Main Content Area */}
+          <main className="relative z-10 flex flex-1 overflow-hidden p-6">
+            <LeftSidebar />
+            <CentralAxis />
+            <RightSidebar />
+          </main>
+
+          {/* Footer Signature */}
+          <div className="pointer-events-none absolute bottom-4 left-6 flex items-center gap-3 text-xs tracking-widest text-[var(--color-text-secondary)]/50">
+            <span>{t('app.location')}</span>
+            <Link
+              to="/court"
+              className="pointer-events-auto flex items-center gap-1 transition-colors hover:text-[var(--color-accent-gold)]"
+              title={t('nav.backToCourt')}
+            >
+              <ArrowLeft size={12} />
+              <span>{t('nav.backToCourt')}</span>
+            </Link>
           </div>
-        </DndProvider>
-      </WorkflowProvider>
+
+          {/* P3 Modal */}
+          {isEdictModalOpen && <EdictModal onClose={() => setIsEdictModalOpen(false)} />}
+        </div>
+      </DndProvider>
+    </WorkflowProvider>
+  );
+}
+
+export function DashboardPage() {
+  return (
+    <I18nProvider engine={i18nEngine}>
+      <DashboardContent />
     </I18nProvider>
   );
 }
