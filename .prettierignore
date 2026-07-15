@@ -1,0 +1,23 @@
+# Build output & deps
+dist
+node_modules
+pnpm-lock.yaml
+
+# Reference material (read-only, preserve original formatting)
+docs
+src/imports
+
+# Vendored shadcn/ui is upstream-aligned; reformatting creates churn that
+# complicates future `npx shadcn add` diffs. Keep their original style.
+src/app/components/ui/[a-z]*.tsx
+
+# Vendored @yyc3/i18n-react — published-package source, not our code style.
+vendor
+
+# Config snapshots & generated
+default_shadcn_theme.css
+
+# OS / editor noise
+.DS_Store
+.crush
+.vscode

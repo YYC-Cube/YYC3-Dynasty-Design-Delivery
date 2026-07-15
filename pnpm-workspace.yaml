@@ -1,0 +1,21 @@
+packages:
+  - '.'
+supportedArchitectures:
+  os:
+    - linux
+  cpu:
+    - x64
+    - arm64
+  libc:
+    - glibc
+# Refuse packages published < 7 days ago, matching the root pnpm-workspace.yaml.
+minimumReleaseAge: 10080
+allowBuilds:
+  '@tailwindcss/oxide': false
+  esbuild: false
+# Pin React types to v18 across the whole tree. Without this, transitive
+# consumers (lucide-react, react-router, etc.) pull @types/react@19 and
+# produce TS2786 "cannot be used as a JSX component" errors at every icon/link.
+overrides:
+  '@types/react': 18.3.1
+  '@types/react-dom': 18.3.1

@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build output
+dist/
+dist-ssr/
+*.local
+# Exception: vendored package ships its prebuilt dist/ — keep it.
+!vendor/**/dist/
+!vendor/**/dist/**
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/settings.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Agent scratch
+.crush/
+
+# Vite temp
+.vite/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Misc
+.cache/
+temp/
+.env
+.env.local
+.env.*.local
+
+# Out-of-scope: separate monorepo vendored under docs/ (399MB, has own package.json)
+docs/YYC3-AI-Dev/
+
+# Sibling local workspace (linked via file: in package.json — replaced by npm/vendor)
+../YYC3-i18n-Core/

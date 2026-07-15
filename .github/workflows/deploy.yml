@@ -1,0 +1,84 @@
+name: Deploy to GitHub Pages
+
+on:
+  # Run the deploy workflow after CI passes on the default branch.
+  push:
+    branches: [main, master]
+  # Allow manual runs from the Actions tab.
+  workflow_dispatch:
+
+# Cancel any superseded deploy run on the same ref.
+concurrency:
+  group: pages-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+# Permissions required by actions/configure-pages and actions/deploy-pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build for Pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # The repo's supportedArchitectures pins linux/{x64,arm64}/glibc, which
+      # is exactly what ubuntu-latest provides — no extra config needed here.
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Circular dependency scan
+        run: pnpm madge
+
+      - name: Build
+        run: pnpm build
+
+      # public/CNAME (dynasty.yyc3.top) and public/.nojekyll are auto-copied
+      # into dist/ by Vite — no extra step needed.
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    name: Deploy
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

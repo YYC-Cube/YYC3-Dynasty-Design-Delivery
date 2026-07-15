@@ -1,0 +1,3 @@
+# Empty marker file — tells GitHub Pages to skip Jekyll processing.
+# Required so that asset paths starting with '_' (e.g. Vite chunks) are served
+# verbatim instead of being interpreted as Jekyll Liquid templates.

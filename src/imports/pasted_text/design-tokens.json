@@ -1,0 +1,950 @@
+# 第十一部分 —— 第十二部分
+
+# 设计交付包结构
+
+```
+YYC3-Dynasty-Design-Delivery/
+├── figma-file/
+│   └── YYC3-Dynasty-v1.0.fig
+├── assets/
+│   ├── icons/           # SVG 图标 (24×24, 48×48)
+│   ├── illustrations/   # 插画 (龙纹、云纹、海水江崖)
+│   ├── seals/           # 玉玺 SVG (多色态)
+│   ├── patterns/        # 纹理 (回纹、汉砖纹)
+│   └── fonts/           # 字体文件引用
+├── tokens/
+│   ├── colors.json      # 色彩 Token
+│   ├── typography.json  # 字体 Token
+│   ├── spacing.json     # 间距 Token
+│   ├── shadows.json     # 阴影 Token
+│   └── radii.json       # 圆角 Token
+├── components/
+│   ├── DynastyButton.spec.md
+│   ├── EdictStepBar.spec.md
+│   ├── MinistryCard.spec.md
+│   ├── SealChain.spec.md
+│   ├── DynastyNavbar.spec.md
+│   └── SearchPalette.spec.md
+├── pages/
+│   ├── P1-Welcome.spec.md
+│   ├── P2-CourtHall.spec.md
+│   ├── P3-ThirteenDynasties.spec.md
+│   ├── P4-MedalWall.spec.md
+│   ├── P5-EdictWorkshop.spec.md
+│   ├── P6-EdictBoard.spec.md
+│   ├── P7-HubFloat.spec.md
+│   ├── P8-DualStarBridge.spec.md
+│   ├── P9-EdictDetail.spec.md
+│   ├── P10-TaishiMonitor.spec.md
+│   └── P11-PalaceRegulation.spec.md
+├── animations/
+│   ├── seal-stamping.json     # 玉玺盖章 Lottie
+│   ├── scroll-unfurl.json     # 圣旨展开 Lottie
+│   ├── dragon-glow.json       # 龙纹流光 Lottie
+│   └── cloud-drift.json       # 云纹漂移 CSS
+└── README.md                  # 交接说明
+```
+
+### 41.2 Design Token 导出格式
+
+```json
+{
+  "collection": "YYC3 Dynasty",
+  "tokens": {
+    "color": {
+      "bg": {
+        "primary": { "$value": "#0a0e17", "$type": "color" },
+        "secondary": { "$value": "#1a1f2e", "$type": "color" },
+        "tertiary": { "$value": "#242b3d", "$type": "color" }
+      },
+      "text": {
+        "primary": { "$value": "#e5e7eb", "$type": "color" },
+        "secondary": { "$value": "#9ca3af", "$type": "color" }
+      },
+      "accent": {
+        "gold": { "$value": "#d4a843", "$type": "color" },
+        "vermillion": { "$value": "#c2414b", "$type": "color" },
+        "azure": { "$value": "#3b82f6", "$type": "color" },
+        "amber": { "$value": "#f59e0b", "$type": "color" },
+        "emerald": { "$value": "#10b981", "$type": "color" },
+        "purple": { "$value": "#8b5cf6", "$type": "color" }
+      }
+    },
+    "typography": {
+      "family": {
+        "display": { "$value": "'方正古隶', '思源宋体', serif", "$type": "fontFamily" },
+        "body": { "$value": "'Inter', 'SF Pro', sans-serif", "$type": "fontFamily" },
+        "mono": { "$value": "'SF Mono', 'JetBrains Mono', monospace", "$type": "fontFamily" }
+      },
+      "size": {
+        "yu-bi": { "$value": "48px", "$type": "fontSize" },
+        "zhao-shu": { "$value": "32px", "$type": "fontSize" },
+        "zou-zhang": { "$value": "20px", "$type": "fontSize" },
+        "body": { "$value": "14px", "$type": "fontSize" },
+        "caption": { "$value": "12px", "$type": "fontSize" }
+      }
+    },
+    "spacing": {
+      "xs": { "$value": "4px", "$type": "spacing" },
+      "sm": { "$value": "8px", "$type": "spacing" },
+      "md": { "$value": "16px", "$type": "spacing" },
+      "lg": { "$value": "24px", "$type": "spacing" },
+      "xl": { "$value": "32px", "$type": "spacing" },
+      "2xl": { "$value": "48px", "$type": "spacing" },
+      "3xl": { "$value": "64px", "$type": "spacing" }
+    },
+    "radius": {
+      "none": { "$value": "0px", "$type": "borderRadius" },
+      "sm": { "$value": "4px", "$type": "borderRadius" },
+      "md": { "$value": "8px", "$type": "borderRadius" },
+      "lg": { "$value": "12px", "$type": "borderRadius" },
+      "xl": { "$value": "16px", "$type": "borderRadius" },
+      "full": { "$value": "9999px", "$type": "borderRadius" }
+    },
+    "shadow": {
+      "sm": { "$value": "0 1px 3px rgba(0,0,0,0.4)", "$type": "boxShadow" },
+      "md": { "$value": "0 4px 12px rgba(0,0,0,0.5)", "$type": "boxShadow" },
+      "lg": { "$value": "0 8px 32px rgba(212,168,67,0.3)", "$type": "boxShadow" },
+      "xl": { "$value": "0 16px 48px rgba(0,0,0,0.6)", "$type": "boxShadow" },
+      "glow": { "$value": "0 0 20px rgba(212,168,67,0.4)", "$type": "boxShadow" }
+    }
+  }
+}
+```
+
+### 41.3 Figma Component Properties 完整定义
+
+```
+核心业务组件 Properties 规范:
+
+1. EdictStepBar (敕令阶段进度条)
+   ┌─────────────────────────────────────────────────────┐
+   │ Property           │ Type           │ Values         │
+   ├────────────────────┼────────────────┼────────────────┤
+   │ Stage Count        │ Variant        │ 4 / 5 / 6 / 7  │
+   │ Current Stage      │ Instance Swap  │ Step Node      │
+   │ Stage 1-7 Status   │ Variant        │ ✅Done/🔄Active/⏳Pending/✕Vetoed │
+   │ Show Timestamps    │ Boolean        │ true / false   │
+   │ Orientation        │ Variant        │ Horizontal / Vertical │
+   └─────────────────────────────────────────────────────┘
+
+2. DynastyButton (朝代按钮)
+   ┌─────────────────────────────────────────────────────┐
+   │ Property           │ Type           │ Values         │
+   ├────────────────────┼────────────────┼────────────────┤
+   │ Dynasty            │ Text           │ "唐"/"汉"/"宋"...│
+   │ State              │ Variant        │ Default/Hover/Active/Disabled/Selected │
+   │ Has Skill Badge    │ Boolean        │ true / false   │
+   │ Skill Count        │ Text           │ "12 Skills"    │
+   │ Icon               │ Instance Swap  │ DynastyIcon    │
+   └─────────────────────────────────────────────────────┘
+
+3. MinistryCard (六部卡片)
+   ┌─────────────────────────────────────────────────────┐
+   │ Property           │ Type           │ Values         │
+   ├────────────────────┼────────────────┼────────────────┤
+   │ Ministry           │ Variant        │ 户/吏/兵/刑/工/礼 │
+   │ Health Status      │ Variant        │ Normal/Warning/Error/Offline │
+   │ Show Metrics       │ Boolean        │ true / false   │
+   │ Expandable         │ Boolean        │ true / false   │
+   │ Compact Mode       │ Boolean        │ true / false   │
+   └─────────────────────────────────────────────────────┘
+
+4. SealChain (签章链)
+   ┌─────────────────────────────────────────────────────┐
+   │ Property           │ Type           │ Values         │
+   ├────────────────────┼────────────────┼────────────────┤
+   │ Seal Count         │ Variant        │ 3 / 5 / 7      │
+   │ Chain Direction    │ Variant        │ Horizontal / Vertical │
+   │ Show Labels        │ Boolean        │ true / false   │
+   │ Seal 1-7 Status    │ Variant        │ Signed/Pending/Vetoed │
+   └─────────────────────────────────────────────────────┘
+
+5. DynastyNavbar (全局导航栏)
+   ┌─────────────────────────────────────────────────────┐
+   │ Property           │ Type           │ Values         │
+   ├────────────────────┼────────────────┼────────────────┤
+   │ Active Nav Item    │ Variant        │ 朝堂/王朝/Skills/旨意 │
+   │ Notification Count │ Text           │ "0" - "99+"    │
+   │ Show Breadcrumb    │ Boolean        │ true / false   │
+   │ Show Search        │ Boolean        │ true / false   │
+   └─────────────────────────────────────────────────────┘
+
+6. SearchPalette (全局搜索面板)
+   ┌─────────────────────────────────────────────────────┐
+   │ Property           │ Type           │ Values         │
+   ├────────────────────┼────────────────┼────────────────┤
+   │ Mode               │ Variant        │ Idle/Searching/Results/NoResults │
+   │ Result Count       │ Text           │ "0" - "50"     │
+   │ Show Categories    │ Boolean        │ true / false   │
+   └─────────────────────────────────────────────────────┘
+```
+
+### 41.4 组件实例交换规范
+
+```
+Instance Swap 映射表:
+
+1. 六部卡片 → 六部图标
+   MinistryCard.HuBu    ↔ HuBuIcon (户部-度支)
+   MinistryCard.LiBu    ↔ LiBuIcon (吏部-铨选)
+   MinistryCard.BingBu  ↔ BingBuIcon (兵部-武备)
+   MinistryCard.XingBu  ↔ XingBuIcon (刑部-律令)
+   MinistryCard.GongBu  ↔ GongBuIcon (工部-营造)
+   MinistryCard.LiBuHR  ↔ LiBuHRIcon (礼部-仪制)
+
+2. 天子驾六 → 六匹马状态
+   每匹马可独立交换 Normal/Warning/Error 状态
+
+3. 玉玺 → 印章状态
+   Seal.Idle     ↔ ImperialSeal/Idle
+   Seal.Hover    ↔ ImperialSeal/Hover
+   Seal.Pressing ↔ ImperialSeal/Pressing
+   Seal.Stamped  ↔ ImperialSeal/Stamped
+   Seal.Locked   ↔ ImperialSeal/Locked
+
+4. 签章链 → 签章节点
+   SealChain.ZhongShu  ↔ SealNode/Signed (中书省已签)
+   SealChain.MenXia    ↔ SealNode/Pending (门下省待签)
+   SealChain.ShangShu  ↔ SealNode/Vetoed (尚书省封驳)
+```
+
+### 41.5 响应式约束与 Auto Layout 策略
+
+```
+Auto Layout 策略:
+
+1. 全局布局
+   ┌─────────────────────────────────────────────┐
+   │ DynastyNavbar (Fixed Top, H:56px)                    │
+   ├─────────────────────────────────────────────┤
+   │ Main Content Area                                   │
+   │ ├─ Horizontal Auto Layout                           │
+   │ │  ├─ 主内容区 (Fill Container, Min W:800px)        │
+   │ │  └─ 侧边快捷入口 (Fixed W:48px, 仅P2)             │
+   │ └─ Vertical Auto Layout                             │
+   │    ├─ 面包屑 (H:32px)                               │
+   │    └─ 页面内容 (Fill Container)                     │
+   ├─────────────────────────────────────────────┤
+   │ Footer (Fixed Bottom, H:32px)                       │
+   └─────────────────────────────────────────────┘
+
+2. 自适应断点
+   ├─ 宽屏 (≥1440px): 三列网格布局
+   ├─ 桌面 (1024-1439px): 两列网格布局
+   ├─ 平板 (768-1023px): 单列 + 折叠侧栏
+   └─ 移动 (≤767px): 单列 + 底部导航替代顶部导航
+
+3. 卡片自适应
+   ├─ MinistryCard: 固定宽度 320px, 高度自适应内容
+   ├─ EdictCard: min-width 280px, 填充可用宽度
+   ├─ DynastyButton: 最小 120px, 文字自适应
+   └─ MedalCard: 固定 160×200px, 不缩放
+```
+
+### 41.6 导出命名规范与交付包
+
+```
+导出命名规范:
+
+格式: {Section}_{Component}_{Variant}_{Size}@{Scale}x.{Format}
+
+导出格式:
+  ├─ 图标: SVG (矢量, 可缩放)
+  ├─ 纹理/图案: PNG-24 (透明度保留)
+  ├─ 插画: PNG-24 + SVG (备份)
+  ├─ 组件缩略图: PNG-24 @2x
+  └─ 动效: Lottie JSON + GIF 预览
+
+交付检查清单:
+  ├─ [ ] 所有 icons 导出 SVG @1x 和 @2x
+  ├─ [ ] 所有纹理 tile 导出 PNG @1x
+  ├─ [ ] 玉玺各状态 SVG 导出 (5 variants)
+  ├─ [ ] 圣旨组件各状态 PNG 导出 (3 states)
+  ├─ [ ] 六部卡片各状态 PNG 导出 (6 ministries × 4 states)
+  ├─ [ ] Design Tokens JSON 导出
+  ├─ [ ] 组件规格文档 Markdown 导出
+  ├─ [ ] A11y 标注文档导出
+  ├─ [ ] Smart Animate 参数 JSON 导出
+  └─ [ ] 交接说明 README.md
+```
+
+# 逻辑认证与风险防控（2026.07.02 四维审计补全）
+
+## §42 全链路逻辑一致性校验
+
+### 42.1 旨意流转全链路校验
+
+```
+校验流程: 创建 → 分拣 → 草拟 → 审议 → 派发 → 执行 → 归档
+
+校验规则:
+  ├─ 阶段不可跳跃 (1→2→3→4→5→6→7 顺序流转)
+  ├─ 阶段不可回退 (除"封驳"回到阶段1重拟外)
+  ├─ 审议需三省签章齐全 (中书+门下+尚书) 方可进入派发
+  ├─ 每个阶段变更需记录流转日志 (时间+操作人+内容)
+  └─ 归档后数据不可修改 (只读状态)
+```
+
+### 42.2 页面间数据一致性
+
+```
+数据一致性校验矩阵:
+
+同步策略:
+  ├─ edictStore: 全局 Zustand Store, 各页面引用同一实例
+  ├─ 写后广播: 修改 edict 后 emit('edict:updated', {id, changes})
+  ├─ 乐观更新: 先更新 UI, 后异步确认 (失败回滚)
+  └─ 跨标签页: BroadcastChannel + 版本号比对
+```
+
+## §43 性能与安全规范
+
+### 43.1 性能预算
+
+```
+性能指标:
+
+| 指标 | 目标值 | 测量工具 |
+|------|--------|---------|
+| FCP (First Contentful Paint) | < 1.5s | Lighthouse |
+| LCP (Largest Contentful Paint) | < 2.5s | Lighthouse |
+| TBT (Total Blocking Time) | < 200ms | Lighthouse |
+| CLS (Cumulative Layout Shift) | < 0.1 | Lighthouse |
+| TTI (Time to Interactive) | < 3.5s | Lighthouse |
+| 首页 JS Bundle | < 150KB (gzip) | Webpack Analyzer |
+| 图片总大小 | < 500KB (首页) | Network Tab |
+
+优化策略:
+  ├─ 路由懒加载: 11 页均使用 dynamic import
+  ├─ 图片优化: WebP 格式 + 响应式 srcset
+  ├─ 字体子集化: 提取仅用到的古文字符
+  ├─ SSG 预渲染: P1/P2/P3 首屏静态生成
+  └─ ISR 增量再生: P6 旨意板每 60s 重新验证
+```
+
+### 43.2 安全规范
+
+```
+安全防护层级:
+
+├─ XSS 防护:
+│  ├─ 所有用户输入经 DOMPurify 清洗
+│  ├─ dangerouslySetInnerHTML 全面禁用
+│  └─ Content-Security-Policy 头部配置
+│
+├─ CSRF 防护:
+│  ├─ 玉玺 Token (JWT) 双 cookie 验证
+│  ├─ SameSite=Strict Cookie
+│  └─ 关键操作需玉玺二次确认 (Re-auth)
+│
+├─ 权限控制:
+│  ├─ RBAC: 天子 > 太子 > 三省 > 六部 > 朝臣
+│  ├─ 路由守卫: 各页面 meta.permission 验证
+│  ├─ API 鉴权: 每个请求携带 Seal-Token
+│  └─ 操作审计: 太史监候 (P10) 记录所有敏感操作
+│
+├─ 数据加密:
+│  ├─ 传输层: TLS 1.3
+│  ├─ 存储层: AES-256-GCM 加密 (敏感字段)
+│  └─ 令牌: 玉玺 JWT 含签名 + 过期时间
+│
+└─ 依赖安全:
+   ├─ pnpm audit 每周执行
+   ├─ Dependabot 自动 PR
+   └─ 锁定文件: pnpm-lock.yaml 提交至仓库
+```
+
+## §44 边界场景与异常处理
+
+### 44.1 边界场景矩阵
+
+```
+边界场景全覆盖:
+
+| 场景类型 | 具体场景 | 处理策略 | 涉及页面 |
+|---------|---------|---------|---------|
+| 空状态 | 无敕令 | 显示空状态插画+引导创建 | P6 |
+| 空状态 | 无朝代 Skill | "待开疆拓土"占位 | P3/P8 |
+| 空状态 | 无通知 | "朝堂无事,四海升平" | 通知中心 |
+| 空状态 | 无搜索结果 | "未找到匹配的敕令/朝代" | 搜索面板 |
+| 加载中 | 数据请求 | Skeleton 加载骨架屏 | P2/P6/P3 |
+| 加载中 | 圣旨展开 | 卷轴逐段渲染动画 | P5/P9 |
+| 加载中 | 玉玺盖章 | 章印逐字浮现 | P5 |
+| 错误 | API 请求失败 | 重试按钮 + "驿马失蹄"提示 | 全局 |
+| 错误 | 网络断开 | "朝堂通讯中断"横幅 + 离线模式 | 全局 |
+| 错误 | 权限不足 | "宫门紧闭"页面 | 全局 |
+| 错误 | 敕令不存在 | "此旨已佚"页面 | P9 |
+| 极限 | 10000+ 条敕令 | 虚拟滚动 + 分页索引 | P6 |
+| 极限 | 同时 50+ Toast | 队列限制 + 折叠 | 全局 |
+| 极限 | 多标签页同时操作 | 版本冲突检测 + 提示刷新 | 全局 |
+| 特殊 | 封驳流转 | 驳回至阶段1, 保留驳回原因 | P5/P6 |
+| 特殊 | 会话过期 | 玉玺令牌失效 → P1 重鉴 | 全局 |
+| 特殊 | 首次访问 | 引导动画 + P1→P2 过渡 | P1 |
+| 特殊 | 会话锁定 | 锁定遮罩 + 玉玺解锁 | P1/P2 |
+```
+
+### 44.2 错误边界组件
+
+```
+ErrorBoundary 三级架构:
+
+┌──────────────────────────────────────────────────┐
+│ L1: 全局错误边界 (RootLayout)                             │
+│   ├─ 捕获未处理的 React 渲染错误                          │
+│   ├─ 显示"紫微城震动"全屏错误页                           │
+│   └─ 提供"重启朝会"按钮（reload）                         │
+├──────────────────────────────────────────────────┤
+│ L2: 页面级错误边界 (每个 Page 独立)                       │
+│   ├─ 捕获页面内组件渲染错误                               │
+│   ├─ 显示该页面的 Error 态 UI                             │
+│   ├─ 其他页面不受影响，可正常导航                         │
+│   └─ 提供"重置此页"按钮（局部 remount）                   │
+├──────────────────────────────────────────────────┤
+│ L3: 组件级错误边界 (关键业务组件)                         │
+│   ├─ EdictStepBar / SealChain / MinistryCard 等          │
+│   ├─ 显示组件 Fallback UI（简化版）                       │
+│   └─ 不影响页面其他区域渲染                               │
+└──────────────────────────────────────────────────┘
+
+全屏错误页 (紫微城震动):
+┌──────────────────────────────────────────────────────────┐
+│                                                          │
+│                     ⚡ 紫微城震动                          │
+│                                                          │
+│           紫微城中枢出现未知紊乱，朝会暂时中断             │
+│                                                          │
+│    错误详情: TypeError: Cannot read property              │
+│    发生时间: 永熙三年·午时三刻                              │
+│    错误编号: ERR-B7F3A2                                   │
+│                                                          │
+│              [重启朝会]  [返回安全模式]                    │
+│                                                          │
+│    自动恢复倒计时: 10s 后自动重启...                       │
+│                                                          │
+└──────────────────────────────────────────────────────────┘
+```
+
+### 44.3 离线与弱网策略
+
+```
+网络状态处理:
+
+├─ 在线检测:
+│  ├─ navigator.onLine + 心跳检测 (/api/ping, 15s 间隔)
+│  └─ 状态: Online / Offline / Slow (RTT > 2s)
+│
+├─ 离线 UI:
+│  ├─ 顶部横幅: "与朝堂通讯中断" (琥珀色, 固定顶部)
+│  ├─ PWA Service Worker 缓存静态资源
+│  └─ IndexedDB 缓存最近 50 条敕令数据
+│
+├─ 弱网策略:
+│  ├─ 请求超时: 10s, 超时自动重试 (最多 3 次)
+│  ├─ 重试间隔: 指数退避 (1s, 2s, 4s)
+│  └─ 离线操作队列: 旨意创建/状态变更排队, 恢复后同步
+│
+└─ PWA 离线页:
+   ├─ 展示已缓存的敕令列表 (只读)
+   ├─ 展示已缓存的十三王朝 Skill
+   └─ "当前为离线模式，部分功能不可用" 提示
+```
+
+## §45 版本管理与迭代规划
+
+### 45.1 版本定义
+
+```
+版本号格式: v{major}.{minor}.{patch}-{stage}
+
+v1.0 MVP 范围:
+  ├─ 11 页完整功能
+  ├─ 全局导航 + 路由系统
+  ├─ 旨意创建→流转→归档 闭环
+  ├─ 天子驾六状态机
+  ├─ 十三王朝 Skill 矩阵
+  ├─ 签章链审批流
+  ├─ 通知中心 + 搜索系统
+  ├─ 无障碍 AA 标准
+  ├─ 基础错误处理
+  └─ 性能预算达标
+
+v1.1 增强:
+  ├─ i18n 古风时辰
+  ├─ 暗色模式切换
+  ├─ 更丰富的动画效果
+  ├─ 快捷键自定义
+  └─ 数据导出 (CSV/JSON)
+```
+
+### 45.2 Figma 版本分支策略
+
+```
+Figma 分支策略:
+
+main (生产分支)
+├── develop (开发分支)
+│   ├── feature/p9-edict-detail    → P9 敕令详情
+│   ├── feature/p10-taishi-monitor → P10 太史监候
+│   ├── feature/p11-palace-reg     → P11 宫阙规制
+│   ├── feature/navbar-v2          → 导航栏优化
+│   └── feature/a11y-enhance      → 无障碍增强
+├── release/v1.0.0-beta
+└── release/v1.0.0
+
+合并规则:
+  ├─ feature → develop: 设计师自审 + 设计评审
+  ├─ develop → release: 全部页面设计走查 + 交互原型测试
+  └─ release → main: PM 签字 + 开发交接确认
+```
+
+### 45.3 设计变更追溯
+
+```
+变更日志格式:
+
+---
+version: 1.0.0-beta.4
+date: 2026-06-14
+author: 设计团队
+changes:
+  - type: addition
+    scope: P9 敕令详情
+    description: 新增敕令详情页，含圣旨完整展示+签章链
+  - type: addition
+    scope: P10 太史监候
+    description: 新增系统监控面板，含六部健康+天象日志
+  - type: addition
+    scope: P11 宫阙规制
+    description: 新增系统设置面板，含权限控制+典章查阅
+  - type: fix
+    scope: P2/P6
+    description: 统一阶段数为 7 (下旨→分拣→草拟→审议→派发→执行→归档)
+  - type: enhancement
+    scope: 全局导航
+    description: 补全路由守卫、深链接、面包屑、通知中心
+  - type: enhancement
+    scope: 全文档
+    description: 消除重复内容, 统一11页系统, 补全编程闭环关键节
+---
+```
+### 45.4 API 契约定义
+
+```
+核心 API 契约:
+
+1. 敕令 CRUD
+   GET    /api/edicts              → EdictList        (列表)
+   GET    /api/edicts/:id          → EdictDetail      (详情)
+   POST   /api/edicts              → Edict             (创建)
+   PATCH  /api/edicts/:id          → Edict             (更新)
+   DELETE /api/edicts/:id          → {success: bool}   (删除)
+
+2. 敕令流转
+   POST /api/edicts/:id/advance    → Edict             (推进到下一阶段)
+   POST /api/edicts/:id/veto       → Edict             (封驳退回)
+
+3. 六部健康
+   GET /api/ministries/health      → MinistryHealth[]  (六部状态)
+   GET /api/ministries/:id/metrics → MinistryMetrics   (单部指标)
+
+4. 通知
+   GET /api/notifications          → Notification[]    (通知列表)
+   PATCH /api/notifications/:id/read → Notification    (标记已读)
+   POST /api/notifications/read-all → {success: bool}  (全部已读)
+
+5. 认证
+   POST /api/auth/verify-seal      → {token, expires}  (玉玺验证)
+   POST /api/auth/refresh          → {token}            (令牌刷新)
+
+6. 搜索
+   GET /api/search?q={query}&type={type} → SearchResult[] (全局搜索)
+
+错误响应格式:
+{
+  "error": {
+    "code": "EDICT_NOT_FOUND",
+    "message": "此旨已佚，或从未存在",
+    "details": { "id": "999" }
+  }
+}
+```
+
+### 45.5 测试场景矩阵
+
+```
+测试场景覆盖:
+
+┌────────────────────────────────────────────────────────┐
+│ 场景分类     │ 场景                         │ 优先级    │
+├──────────────┼─────────────────────────────┼───────────┤
+│ 正向流       │ 创建旨意→完整7阶段流转→归档 │ P0        │
+│ 正向流       │ 朝代切换→Skill列表正确更新   │ P0        │
+│ 正向流       │ 六部健康状态实时刷新         │ P0        │
+│ 正向流       │ 玉玺盖章完整5阶段动画       │ P1        │
+│ 正向流       │ 全局搜索→精确匹配→跳转      │ P0        │
+│ 正向流       │ 通知推送→导航栏角标→已读    │ P1        │
+│ 逆向流       │ 封驳→退回阶段1→重新流转     │ P0        │
+│ 逆向流       │ 旨意删除→列表移除→撤销恢复  │ P1        │
+│ 边界         │ 空列表状态正确展示           │ P1        │
+│ 边界         │ 10000+条数据虚拟滚动        │ P2        │
+│ 边界         │ 网络断开→离线模式→恢复同步  │ P1        │
+│ 边界         │ 同时50+Toast队列管理        │ P2        │
+│ 异常         │ API超时→重试→失败提示       │ P0        │
+│ 异常         │ 权限不足→宫门紧闭页面       │ P1        │
+│ 异常         │ 组件渲染错误→Error Boundary │ P1        │
+│ 异常         │ 令牌过期→重新验证           │ P0        │
+│ 兼容         │ Chrome/Firefox/Safari/Edge  │ P0        │
+│ 兼容         │ 桌面/平板/移动端响应式      │ P1        │
+│ 兼容         │ 屏幕阅读器 (VoiceOver)      │ P2        │
+│ 无障碍       │ Tab键完整导航流             │ P1        │
+│ 无障碍       │ 色彩对比度AA级达标          │ P1        │
+│ 无障碍       │ 200%缩放不截断             │ P2        │
+└────────────────────────────────────────────────────────┘
+```
+
+### 45.6 WebSocket 实时通信
+
+```
+WebSocket 连接规范:
+
+连接端点: wss://dynasty.yyc3.com/ws
+协议: JSON 帧
+
+心跳机制:
+  ├─ Ping 间隔: 30s
+  ├─ Pong 超时: 10s (超时自动重连)
+  └─ 重连策略: 指数退避 1s, 2s, 4s, 8s, 16s, 最多 5 次
+
+消息类型:
+  ├─ edict:update     → 敕令状态变更广播
+  ├─ ministry:health  → 六部健康状态推送
+  ├─ notification:new → 新通知推送
+  ├─ seal:revoke      → 令牌吊销通知 (强制登出)
+  └─ system:announce  → 系统公告
+
+连接生命周期:
+  ├─ 连接建立: 发送 auth 帧 (玉玺 Token)
+  ├─ 订阅频道: [edict, ministry, notification, system]
+  ├─ 断开重连: 指数退避, 重连后重新订阅
+  └─ 页面休眠: Page Visibility API, 隐藏时降级为轮询 (60s)
+```
+
+---
+
+---
+
+# 第十二部分：交付与验收
+
+## §26 四道核心校验规则
+
+### 26.1 第一道：文化校验
+
+```
+校验清单:
+
+├─ 玉玺系统:
+│  ├─ [ ] 玉玺外观符合"受命于天·既寿永昌"规制
+│  ├─ [ ] 盖章动效5个阶段完整
+│  ├─ [ ] 玉玺使用场景正确
+│  └─ [ ] 无权限时显示灰白锁定态
+│
+├─ 圣旨系统:
+│  ├─ [ ] 明黄丝绢底色 + 左右龙纹织锦镶边
+│  ├─ [ ] 天头蓝绫 (40px) + 地头蓝绫 (30px)
+│  ├─ [ ] 正文竖排从右向左
+│  ├─ [ ] 卷轴木杆檀木色 + 鎏金轴头
+│  └─ [ ] 展开动画完整 (收起60px → 展开600px)
+│
+├─ 三省六部:
+│  ├─ [ ] 中书省(石青) / 门下省(藤黄) / 尚书省(翠涛)
+│  ├─ [ ] 六部图标与职能对应正确
+│  └─ [ ] 朝堂中轴线(洛水)贯穿全局
+│
+├─ 十三王朝:
+│  ├─ [ ] 13个朝代顺序正确
+│  ├─ [ ] 每个朝代对应正确的都城
+│  └─ [ ] 朝代色彩符合历史意象
+│
+└─ 天子驾六:
+   ├─ [ ] 六匹马对应六部
+   ├─ [ ] 每匹马独立悬浮动画 (stagger 0.3s)
+   └─ [ ] 健康状态 Normal/Warning/Error 可切换
+```
+
+### 26.2 第二道：交互校验
+
+```
+交互校验清单:
+
+├─ 导航:
+│  ├─ [ ] 4个主导航项
+│  ├─ [ ] 面包屑路径正确
+│  ├─ [ ] 侧边快捷入口可用
+│  ├─ [ ] 路由守卫鉴权正常
+│  └─ [ ] 深链接支持完整
+│
+├─ 表单:
+│  ├─ [ ] 敕令创建表单校验完整
+│  ├─ [ ] 错误提示即时反馈
+│  └─ [ ] 草稿自动保存
+│
+├─ 流转:
+│  ├─ [ ] 7阶段顺序流转不可跳跃
+│  ├─ [ ] 封驳功能退回阶段1
+│  ├─ [ ] 审批签章链实时更新
+│  └─ [ ] 归档后不可修改
+│
+├─ 通知:
+│  ├─ [ ] Toast 四级优先级正确
+│  ├─ [ ] 导航栏角标实时更新
+│  ├─ [ ] 通知中心下拉面板可用
+│  └─ [ ] P0 通知可插队
+│
+├─ 搜索:
+│  ├─ [ ] ⌘K 唤起/关闭搜索面板
+│  ├─ [ ] 实时过滤结果
+│  ├─ [ ] 键盘上下导航
+│  └─ [ ] 搜索结果点击跳转
+│
+└─ 批量操作:
+   ├─ [ ] ⌘B 进入批量模式
+   ├─ [ ] 多选 + 全选
+   └─ [ ] 批量催办/封驳/归档
+```
+
+### 26.3 第三道：视觉校验
+
+```
+视觉校验清单:
+
+├─ 色彩: 玄墨底色, 鎏金强调, 朱砂警示, 翠涛成功
+├─ 字体: 御笔48px, 诏书32px, 奏章20px, 正文14px
+├─ 间距: 遵循 xs/sm/md/lg/xl/2xl/3xl 规范
+├─ 圆角: 卡片 lg(12px), 按钮 md(8px), 徽章 full
+├─ 阴影: 玉玺 lg shadow (0 8px 32px gold)
+├─ 纹理:
+│  ├─ [ ] 云纹背景底纹 (rgba(212,168,67,0.04))
+│  ├─ [ ] 回纹卡片边框 (2px, rgba(212,168,67,0.3))
+│  ├─ [ ] 龙纹 Hero 暗纹 (rgba(212,168,67,0.06))
+│  └─ [ ] 汉砖纹 Footer (错缝排列)
+├─ 动效:
+│  ├─ [ ] 玉玺盖章 (1.2s, 5 phases)
+│  ├─ [ ] 圣旨展开 (0.8s, ease-out)
+│  ├─ [ ] 页面过渡 (0.4s, slide)
+│  ├─ [ ] 龙纹流光 (3s 循环)
+│  └─ [ ] 云纹漂移 (30s 循环)
+└─ 暗色模式 (v1.1):
+   └─ [ ] 所有色彩有对应的暗色模式变量
+```
+
+### 26.4 第四道：工程校验
+
+```
+工程校验清单:
+
+├─ 性能: FCP<1.5s, LCP<2.5s, TBT<200ms, CLS<0.1
+├─ 安全: XSS/CSRF/RBAC/TLS/加密 五层防护
+├─ 兼容: Chrome/Firefox/Safari/Edge
+├─ 响应式: 桌面/平板/移动 三断点
+├─ 无障碍: 色彩对比度AA, Tab导航, 屏幕阅读器
+├─ 测试: 正向流/逆向流/边界/异常 场景覆盖
+├─ 导出: Figma Assets + Tokens + Specs 完整交付包
+└─ 版本: v1.0.0 范围明确, v1.1 规划清晰
+```
+
+---
+
+## §27 Figma 交付规范
+
+### 27.1 文件结构
+
+```
+YYC3-Dynasty-v1.0.fig
+
+├── 📄 Cover (封面页)
+├── 📐 Design System (设计系统)
+│   ├── 🎨 Colors / 🔤 Typography / 📏 Spacing / 🔲 Radius / 🌑 Shadows
+│   ├── 📐 Grid (网格系统)
+│   └── 🎭 Patterns (纹样库)
+├── 🧩 Components (组件库)
+│   ├── Navigation (DynastyNavbar / Breadcrumb / SideQuickEntry)
+│   ├── Imperial (ImperialSeal / EdictScroll)
+│   ├── Data Display (MinistryCard / EdictStepBar / SealChain / DynastyButton / MedalCard)
+│   ├── Feedback (Toast / NotificationCenter / SearchPalette / LoadingSkeleton)
+│   └── Form (DynastyInput / DynastySelect / DynastyTextarea)
+├── 📱 Pages (11 页面)
+│   ├── P1-Welcome → P11-PalaceRegulation
+├── 🔄 Flows (交互流程)
+│   ├── Edict Lifecycle / Navigation Map / Error States
+└── 📋 Handoff (开发交接)
+    ├── Design Tokens (JSON) / Asset Export / Component Specs
+```
+
+### 27.2 页面状态矩阵
+
+```
+每页需覆盖的状态:
+
+| 页面 | Default | Loading | Empty | Error | Edge |
+|------|:-------:|:-------:|:-----:|:-----:|:----:|
+| P1 启动 | ✅ | ✅ | - | - | - |
+| P2 朝堂 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| P3 王朝 | ✅ | ✅ | ✅ | - | - |
+| P4 勋章 | ✅ | - | ✅ | - | - |
+| P5 工坊 | ✅ | - | - | ✅ | ✅ |
+| P6 旨意板 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| P7 Hub | ✅ | - | ✅ | - | - |
+| P8 双星桥 | ✅ | ✅ | ✅ | - | - |
+| P9 敕令详情 | ✅ | ✅ | - | ✅ | - |
+| P10 太史 | ✅ | ✅ | - | - | - |
+| P11 宫阙 | ✅ | - | - | - | - |
+```
+
+---
+
+## §28 验收闭环清单（v1.0 四维扩展版）
+
+### 页面完整性（11 页）
+
+- [ ] P1 启动页：玉玺落下动效 + 9 入口卡片（3×3 网格）
+- [ ] P2 朝堂大厅：8 节点 + 中轴线光带 + 天子驾六悬浮 + 侧边快捷入口
+- [ ] P3 十三王朝：13 朝代选择器 + Skill 卡片矩阵
+- [ ] P4 勋章墙：17 勋章 × 2 态（获得/未获得）
+- [ ] P5 旨意工坊：圣旨展开 + 玉玺盖章完整动效 + 表单校验 + 存草稿
+- [ ] P6 旨意板：敕令列表 + 7 阶段进度条 + 流转日志 + 分页排序
+- [ ] P7 Hub 浮窗：浮动按钮 + 展开面板 + 12 人格切换 + 对话历史
+- [ ] P8 双星桥：Family 圆环 + Dynasty 层级 + 桥接金线
+- [ ] P9 敕令详情：圣旨完整展示 + 七阶段进度 + 签章链 + 流转日志
+- [ ] P10 太史监候：系统监控面板 + 六部健康 + 实时天象日志
+- [ ] P11 宫阙规制：系统设置面板 + 权限控制 + 典章查阅
+- [ ] 全局导航：DynastyNavbar + 面包屑 + 通知中心下拉面板
+
+### 链路衔接验收（6 项）
+
+- [ ] 全局导航栏：4 个主导航项 + 面包屑 + 侧边快捷入口
+- [ ] 完整路由表：11 条路由（含参数传递 + 权限校验）
+- [ ] 数据流闭环：旨意创建→流转→归档 全链路跨页面同步
+- [ ] 全局状态管理：5 个 Store（edict/ministry/persona/dynasty/notification）
+- [ ] 通知系统：三级体系（朝钟/飞鸽/烽火）+ 导航栏角标 + Toast + 通知中心
+- [ ] 全局搜索：⌘K 唤起 + 实时过滤 + 分类结果 + 键盘导航
+
+### 功能交互验收（8 项）
+
+- [ ] 表单校验：敕令创建表单完整校验 + 即时错误反馈
+- [ ] CRUD 闭环：敕令创建→查询→更新→删除 全操作 + 乐观更新
+- [ ] Keyboard 快捷键：⌘K 搜索 / ⌘Z 撤销 / ⌘S 保存 / ⌘B 批量 等
+- [ ] 实时更新：WebSocket 推送 + 六部健康 / 通知实时刷新
+- [ ] Toast 队列：P0-P3 四级优先级 + 插队 + 合并 + 队列上限
+- [ ] 自动保存：旨意草稿 5s 防抖保存 + 离线队列
+- [ ] 撤销/重做：20 步操作栈 + 批量撤销
+- [ ] 批量操作：⌘B 多选模式 + 全选 + 批量催办/封驳/归档
+
+### 实操传递验收（6 项）
+
+- [ ] Figma Variables：10 组 Collection 完整定义
+- [ ] Smart Animate：玉玺/圣旨/页面过渡参数完整
+- [ ] A11y 标注：对比度 + Focus Ring + ARIA + 键盘导航
+- [ ] 交付包：Assets + Tokens JSON + Component Specs + Animations
+- [ ] Component Properties：6 个核心组件完整 Variant/Boolean/Text/Instance Swap 属性
+- [ ] 响应式约束：3 断点 + Auto Layout 策略
+
+### 逻辑认证验收（7 项）
+
+- [ ] 全链路一致性：旨意 7 阶段流转 + 页面间数据同步 + 朝代-Skill 映射
+- [ ] 性能预算：FCP<1.5s + LCP<2.5s + TBT<200ms
+- [ ] 安全防护：XSS/CSRF/RBAC/TLS/加密 五层防护
+- [ ] 边界场景：空/加载/错误/极限 16+ 场景覆盖
+- [ ] 错误恢复：三级 ErrorBoundary + 离线策略 + 弱网重试
+- [ ] API 契约：6 个核心 API 组 + 标准错误格式
+- [ ] 测试矩阵：正向/逆向/边界/异常/兼容/无障碍 20+ 场景
+
+---
+
+# 附录
+
+## 附录 A：快速索引
+
+### 页面索引
+
+| 编号 | 页面名称 | 古称 | 路由 | Figma Frame |
+|------|---------|------|------|-------------|
+| P1 | 启动页 | 验玺 · 启封 | /welcome | P1-Welcome |
+| P2 | 朝堂大厅 | 紫微城 · 正衙 | /court | P2-CourtHall |
+| P3 | 十三王朝 | 历代舆图 | /timeline | P3-ThirteenDynasties |
+| P4 | 勋章墙 | 麒麟阁 | /honors | P4-MedalWall |
+| P5 | 旨意工坊 | 中书省 · 草诏 | /edict/create | P5-EdictWorkshop |
+| P6 | 旨意板 | 尚书省 · 行牒 | /edict | P6-EdictBoard |
+| P7 | Hub 浮窗 | 万象枢 | /hub | P7-HubFloat |
+| P8 | 双星桥 | 星汉桥 | /bridge | P8-DualStarBridge |
+| P9 | 敕令详情 | 御览 · 敕牒 | /edict/:id | P9-EdictDetail |
+| P10 | 太史监候 | 司天监 | /monitor | P10-TaishiMonitor |
+| P11 | 宫阙规制 | 紫微城 · 规制 | /settings | P11-PalaceRegulation |
+
+### 部门索引
+
+| 部门 | 古称 | 色彩 | 职能 | 对应马 |
+|------|------|------|------|--------|
+| 中书省 | 凤阁 | 石青 #3b82f6 | 决策草拟 | - |
+| 门下省 | 鸾台 | 藤黄 #f59e0b | 审议封驳 | - |
+| 尚书省 | 文昌府 | 翠涛 #10b981 | 执行派发 | - |
+| 户部 | 度支 | 鎏金 | 财政经济 | 骅骝 (赤马) |
+| 吏部 | 铨选 | 霜白 | 考核任免 | 騄駬 (白马) |
+| 兵部 | 武备 | 朱砂 | 军政国防 | 骊驹 (黑马) |
+| 刑部 | 律令 | 墨灰 | 司法刑狱 | 騑騑 (灰马) |
+| 工部 | 营造 | 古铜 | 工程建造 | 骐骥 (棕马) |
+| 礼部 | 仪制 | 绀紫 | 礼仪外交 | 騋牝 (紫马) |
+
+### 组件索引
+
+| 组件 | 类型 | 使用页面 |
+|------|------|---------|
+| ImperialSeal | 玉玺组件 | P1/P5/P9/全局 |
+| EdictScroll | 圣旨卷轴 | P5/P9 |
+| DynastyNavbar | 全局导航 | 所有页面 |
+| MinistryCard | 六部卡片 | P2 |
+| EdictStepBar | 阶段进度条 | P6/P9 |
+| SealChain | 签章链 | P6/P9 |
+| DynastyButton | 朝代按钮 | P3/P8 |
+| MedalCard | 勋章卡片 | P4 |
+| SearchPalette | 搜索面板 | 全局 |
+| NotificationCenter | 通知中心 | 全局 |
+| Toast | 通知提示 | 全局 |
+| Breadcrumb | 面包屑 | 所有页面 |
+| SideQuickEntry | 侧边快捷入口 | P2 |
+
+## 附录 B：图例说明
+
+```
+═══════════════════════════════════════════════════════
+                    YYC³ Dynasty 图例
+═══════════════════════════════════════════════════════
+
+结构标记:
+  #                → 一级标题 (Part)
+  ##               → 二级标题 (Section / §)
+  ###              → 三级标题 (Sub-section)
+  ├─ └─            → 树形结构
+  ┌─┐└─┘├─┤        → 面板/UI区域
+
+状态标记:
+  ✅               → 已完成/通过
+  🔄               → 进行中
+  ⏳               → 待办/等待
+  ✕                → 拒绝/驳回
+  ⚡               → 紧急/告警
+
+色彩标记:
+  #d4a843 (鎏金)   → 强调/主要动作
+  #c2414b (朱砂)   → 驳回/警告/删除
+  #10b981 (翠涛)   → 成功/通过
+  #3b82f6 (石青)   → 信息/链接
+  #f59e0b (藤黄)   → 审议/待处理
+  #8b5cf6 (绀紫)   → 天子/最高权限
+```
+
+---
+
+> **三省以治，六部以行** — Rule with Three Councils, Execute with Six Ministries
+> **言启象限 | 语枢未来** — Words Initiate Quadrants, Language Serves as Core
+> **人从众曌众从人** 🌹
