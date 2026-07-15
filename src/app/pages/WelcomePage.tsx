@@ -38,7 +38,7 @@ export function WelcomePage() {
           {/* Stamp Icon */}
           <div className="flex h-full w-full items-center justify-center rounded-sm border-4 border-[var(--color-accent-vermillion)]">
             <span className="font-serif text-2xl font-bold text-[var(--color-accent-vermillion)]">
-              受命
+              {t('welcome.sealText')}
             </span>
           </div>
         </div>

@@ -127,12 +127,12 @@ const MOCK_OFFICIALS: OfficialStats[] = [
   },
 ];
 
-const DIMENSION_LABELS: Record<string, string> = {
-  角色: '角色勋章',
-  成就: '成就勋章',
-  协作: '协作勋章',
-  安全: '安全勋章',
-  效率: '效率勋章',
+const DIMENSION_LABEL_KEYS: Record<string, string> = {
+  角色: 'honors.dimensionLabels.角色',
+  成就: 'honors.dimensionLabels.成就',
+  协作: 'honors.dimensionLabels.协作',
+  安全: 'honors.dimensionLabels.安全',
+  效率: 'honors.dimensionLabels.效率',
 };
 
 export function HonorsPage() {
@@ -148,9 +148,11 @@ export function HonorsPage() {
     <div className="mx-auto max-w-[800px] px-6 py-8">
       {/* Header */}
       <div className="mb-8 text-center">
-        <h2 className="mb-2 font-serif text-3xl text-[var(--color-accent-gold)]">🏅 勋 章 墙</h2>
+        <h2 className="mb-2 font-serif text-3xl text-[var(--color-accent-gold)]">
+          {t('honors.pageTitle')}
+        </h2>
         <p className="text-sm text-[var(--color-text-secondary)]">
-          {HONORS.length} 种 · 1-6 星 · 已获得 {totalEarned} 枚
+          {t('honors.subtitle', { total: String(HONORS.length), earned: String(totalEarned) })}
         </p>
       </div>
 
@@ -158,7 +160,7 @@ export function HonorsPage() {
       <div className="mb-8 overflow-hidden rounded-lg border border-[var(--color-accent-gold)]/30 bg-[var(--color-bg-secondary)]">
         <div className="border-b border-[var(--color-accent-gold)]/20 bg-[var(--color-bg-tertiary)] px-4 py-3">
           <h3 className="font-serif text-sm text-[var(--color-accent-gold)]">
-            功勋榜 · Merit Ranking
+            {t('honors.leaderboard')}
           </h3>
         </div>
         <div className="divide-y divide-[var(--color-bg-primary)]">
@@ -218,10 +220,11 @@ export function HonorsPage() {
                 className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-[var(--color-bg-tertiary)]"
               >
                 <span className="font-serif text-sm text-[var(--color-accent-gold)]">
-                  {DIMENSION_LABELS[dim] || dim}
+                  {t(DIMENSION_LABEL_KEYS[dim] || 'honors.dimensionLabels.角色')}
                 </span>
                 <span className="text-xs text-[var(--color-text-secondary)]">
-                  {honors.length} 枚 · {isExpanded ? '收起' : '展开'}
+                  {honors.length} {t('honors.medals')} ·{' '}
+                  {isExpanded ? t('honors.collapse') : t('honors.expand')}
                 </span>
               </button>
               {isExpanded && (
@@ -254,6 +257,7 @@ export function HonorsPage() {
 }
 
 function HonorCard({ honor, earned }: { honor: Honor; earned: boolean }) {
+  const { t } = useTranslation();
   const tier = getRarityTier(honor.stars);
 
   return (
@@ -281,14 +285,14 @@ function HonorCard({ honor, earned }: { honor: Honor; earned: boolean }) {
           </span>
         </div>
         <div className="mt-1 text-xs text-[var(--color-text-secondary)]">
-          条件：{honor.condition}
+          {t('honors.condition')}：{honor.condition}
         </div>
       </div>
 
       {/* Status badge */}
       {earned && (
         <span className="rounded bg-[var(--color-accent-emerald)]/20 px-2 py-1 text-[10px] text-[var(--color-accent-emerald)]">
-          已获得
+          {t('honors.earned')}
         </span>
       )}
     </div>

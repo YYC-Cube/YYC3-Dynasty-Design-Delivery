@@ -2,6 +2,7 @@ import React, { createContext, useContext, useReducer, ReactNode, useEffect } fr
 
 import type { Edict, EdictStatus, EdictMessage, HistoryLog } from '../domain';
 import { resolveTransition, isValidTransition, sanitizeText } from '../domain';
+import { t as _t } from '@/i18n';
 
 // ── State ────────────────────────────────────────────────────────────────
 
@@ -207,7 +208,10 @@ function workflowReducer(state: WorkflowState, action: WorkflowAction): Workflow
             at: ts,
             from: edict.status,
             to: resolved.status,
-            remark: action.payload.remark || resolved.pendingConfirm ? '待复核确认' : '',
+            remark:
+              action.payload.remark || resolved.pendingConfirm
+                ? _t('edict.historyAction.pendingConfirm')
+                : '',
             agent: action.payload.operator,
             agentLabel: action.payload.operator,
           },
@@ -222,7 +226,9 @@ function workflowReducer(state: WorkflowState, action: WorkflowAction): Workflow
             id: `LOG-${Date.now()}`,
             edictId: action.payload.id,
             timestamp: ts,
-            action: resolved.pendingConfirm ? '待复核' : '流转',
+            action: resolved.pendingConfirm
+              ? _t('edict.historyAction.pendingReview')
+              : _t('edict.historyAction.flow'),
             operator: action.payload.operator,
             details: resolved.pendingConfirm
               ? `请求流转至${action.payload.target}，待${resolved.pendingConfirm.confirmBy}复核`

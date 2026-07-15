@@ -272,4 +272,24 @@ export const en = {
     zhCN: '简体中文',
     en: 'English',
   },
+
+  honors: {
+    pageTitle: '🏅 Hall of Honors',
+    subtitle: '{total} medals · 1-6 stars · {earned} earned',
+    leaderboard: 'Merit Ranking',
+    done: 'done',
+    participation: 'participated',
+    medals: 'medals',
+    collapse: 'Collapse',
+    expand: 'Expand',
+    earned: 'Earned',
+    condition: 'Requirement',
+    dimensionLabels: {
+      角色: 'Role Medals',
+      成就: 'Achievement Medals',
+      协作: 'Collaboration Medals',
+      安全: 'Security Medals',
+      效率: 'Efficiency Medals',
+    },
+  },
 } as const;

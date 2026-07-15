@@ -281,4 +281,25 @@ export const zhCN = {
     zhCN: '简体中文',
     en: 'English',
   },
+
+  // Honors page
+  honors: {
+    pageTitle: '🏅 勋 章 墙',
+    subtitle: '{total} 种 · 1-6 星 · 已获得 {earned} 枚',
+    leaderboard: '功勋榜 · Merit Ranking',
+    done: '办结',
+    participation: '参与',
+    medals: '枚',
+    collapse: '收起',
+    expand: '展开',
+    earned: '已获得',
+    condition: '条件',
+    dimensionLabels: {
+      角色: '角色勋章',
+      成就: '成就勋章',
+      协作: '协作勋章',
+      安全: '安全勋章',
+      效率: '效率勋章',
+    },
+  },
 } as const;
