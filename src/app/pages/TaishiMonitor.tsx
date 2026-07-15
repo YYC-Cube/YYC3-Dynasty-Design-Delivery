@@ -14,72 +14,79 @@ import {
   Radar,
 } from 'recharts';
 import { motion } from 'motion/react';
+import { useTranslation } from '@yyc3/i18n-react';
 
 const SHICHEN = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
 
-const LINE_DATA = SHICHEN.map((s) => ({
-  name: s,
-  创建: Math.floor(Math.random() * 50) + 10,
-  办结: Math.floor(Math.random() * 45) + 5,
-  封驳: Math.floor(Math.random() * 10),
-}));
-
-const RADAR_DATA = [
-  { subject: '户部', A: 2.1, fullMark: 5 },
-  { subject: '礼部', A: 1.8, fullMark: 5 },
-  { subject: '兵部', A: 4.2, fullMark: 5 }, // Warning: > 3s
-  { subject: '刑部', A: 1.5, fullMark: 5 },
-  { subject: '工部', A: 2.8, fullMark: 5 },
-  { subject: '吏部', A: 1.2, fullMark: 5 },
-];
-
-const EVENTS = [
-  {
-    id: 1,
-    time: '午时三刻',
-    type: '祥瑞',
-    text: '敕令 edict-045 办结归档',
-    color: 'text-[var(--color-accent-emerald)]',
-    icon: '🌟',
-  },
-  {
-    id: 2,
-    time: '午时二刻',
-    type: '异象',
-    text: '兵部令牌数低于阈值(2/5)',
-    color: 'text-[var(--color-accent-amber)]',
-    icon: '⚠️',
-  },
-  {
-    id: 3,
-    time: '午时一刻',
-    type: '灾异',
-    text: '刑部扫描发现异常访问',
-    color: 'text-[var(--color-accent-vermillion)]',
-    icon: '🔥',
-  },
-  {
-    id: 4,
-    time: '巳时四刻',
-    type: '祥瑞',
-    text: '门下省通过 edict-043',
-    color: 'text-[var(--color-accent-emerald)]',
-    icon: '🌟',
-  },
-  {
-    id: 5,
-    time: '巳时三刻',
-    type: '日表',
-    text: '户部算力消耗达75%',
-    color: 'text-[var(--color-accent-azure)]',
-    icon: '📊',
-  },
-];
-
 export function TaishiMonitor() {
+  const { t } = useTranslation();
   const [currentTime, setCurrentTime] = useState('永熙三年·午时三刻');
 
-  // Real-time clock mock
+  const chartCreatedKey = t('monitor.chartCreated');
+  const chartDoneKey = t('monitor.chartDone');
+  const chartVetoedKey = t('monitor.chartVetoed');
+
+  const [lineData] = useState(() =>
+    SHICHEN.map((s) => ({
+      name: s,
+      [chartCreatedKey]: Math.floor(Math.random() * 50) + 10,
+      [chartDoneKey]: Math.floor(Math.random() * 45) + 5,
+      [chartVetoedKey]: Math.floor(Math.random() * 10),
+    })),
+  );
+
+  const radarData = [
+    { subject: t('court.ministries.hu'), A: 2.1, fullMark: 5 },
+    { subject: t('court.ministries.li'), A: 1.8, fullMark: 5 },
+    { subject: t('court.ministries.bing'), A: 4.2, fullMark: 5 },
+    { subject: t('court.ministries.xing'), A: 1.5, fullMark: 5 },
+    { subject: t('court.ministries.gong'), A: 2.8, fullMark: 5 },
+    { subject: t('court.ministries.li2'), A: 1.2, fullMark: 5 },
+  ];
+
+  const EVENTS = [
+    {
+      id: 1,
+      time: '午时三刻',
+      type: t('monitor.eventTypes.auspicious'),
+      text: '敕令 edict-045 办结归档',
+      color: 'text-[var(--color-accent-emerald)]',
+      icon: '🌟',
+    },
+    {
+      id: 2,
+      time: '午时二刻',
+      type: t('monitor.eventTypes.anomaly'),
+      text: '兵部令牌数低于阈值(2/5)',
+      color: 'text-[var(--color-accent-amber)]',
+      icon: '⚠️',
+    },
+    {
+      id: 3,
+      time: '午时一刻',
+      type: t('monitor.eventTypes.disaster'),
+      text: '刑部扫描发现异常访问',
+      color: 'text-[var(--color-accent-vermillion)]',
+      icon: '🔥',
+    },
+    {
+      id: 4,
+      time: '巳时四刻',
+      type: t('monitor.eventTypes.auspicious'),
+      text: '门下省通过 edict-043',
+      color: 'text-[var(--color-accent-emerald)]',
+      icon: '🌟',
+    },
+    {
+      id: 5,
+      time: '巳时三刻',
+      type: t('monitor.eventTypes.daily'),
+      text: '户部算力消耗达75%',
+      color: 'text-[var(--color-accent-azure)]',
+      icon: '📊',
+    },
+  ];
+
   useEffect(() => {
     const timer = setInterval(() => {
       const d = new Date();
@@ -90,16 +97,95 @@ export function TaishiMonitor() {
     return () => clearInterval(timer);
   }, []);
 
+  const kpis = [
+    {
+      title: t('monitor.celestial.ziwei'),
+      subtitle: 'System Health',
+      val: '92%',
+      stat: t('monitor.kpiHealth'),
+      color: 'text-[var(--color-accent-emerald)]',
+      bar: 'bg-[var(--color-accent-emerald)]',
+    },
+    {
+      title: t('monitor.celestial.beidou'),
+      subtitle: 'Active Alerts',
+      val: '3 active',
+      stat: '2 warning · 1 err',
+      color: 'text-[var(--color-accent-amber)]',
+      bar: 'bg-[var(--color-accent-amber)]',
+    },
+    {
+      title: t('monitor.celestial.taiyin'),
+      subtitle: 'Uptime',
+      val: '127d 14h',
+      stat: t('monitor.kpiUptime'),
+      color: 'text-[var(--color-accent-azure)]',
+      bar: 'bg-[var(--color-accent-azure)]',
+    },
+  ];
+
+  const ministries = [
+    {
+      n: t('court.ministries.hu'),
+      head: '大司徒',
+      stat: 'Online',
+      c: 'var(--color-accent-emerald)',
+      tasks: '4 / 12',
+      time: '1.2s',
+    },
+    {
+      n: t('court.ministries.li'),
+      head: '大宗伯',
+      stat: 'Online',
+      c: 'var(--color-accent-emerald)',
+      tasks: '1 / 5',
+      time: '1.8s',
+    },
+    {
+      n: t('court.ministries.bing'),
+      head: '大司马',
+      stat: 'Warning',
+      c: 'var(--color-accent-amber)',
+      tasks: '8 / 8',
+      time: '4.2s',
+      err: true,
+    },
+    {
+      n: t('court.ministries.xing'),
+      head: '大司寇',
+      stat: 'Online',
+      c: 'var(--color-accent-emerald)',
+      tasks: '2 / 9',
+      time: '1.5s',
+    },
+    {
+      n: t('court.ministries.gong'),
+      head: '大司空',
+      stat: 'Online',
+      c: 'var(--color-accent-emerald)',
+      tasks: '5 / 15',
+      time: '2.8s',
+    },
+    {
+      n: t('court.ministries.li2'),
+      head: '大宰',
+      stat: 'Online',
+      c: 'var(--color-accent-emerald)',
+      tasks: '0 / 3',
+      time: '1.2s',
+    },
+  ];
+
   return (
     <div className="mx-auto max-w-[1200px] px-6 pt-6 pb-12">
       {/* Header */}
       <div className="mb-8 flex items-end justify-between border-b border-[var(--color-accent-gold)]/20 pb-4">
         <div>
           <h2 className="mb-2 font-serif text-3xl tracking-widest text-[var(--color-accent-gold)] drop-shadow-[0_0_10px_rgba(212,168,67,0.3)]">
-            🔭 太 史 监 候
+            {t('monitor.pageTitle')}
           </h2>
           <p className="font-serif text-sm text-[var(--color-text-secondary)]">
-            观星辰之变 · 察万象之机
+            {t('monitor.subtitle')}
           </p>
         </div>
         <div className="text-right">
@@ -108,39 +194,14 @@ export function TaishiMonitor() {
           </div>
           <div className="flex items-center justify-end gap-1 text-[10px] text-[var(--color-accent-emerald)]">
             <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-accent-emerald)]"></span>
-            每 30 秒观星一次
+            {t('monitor.pollInterval')}
           </div>
         </div>
       </div>
 
       {/* Section 1: Celestial Health Overview */}
       <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-        {[
-          {
-            title: '🌟 紫微星',
-            subtitle: 'System Health',
-            val: '92%',
-            stat: '正常运行',
-            color: 'text-[var(--color-accent-emerald)]',
-            bar: 'bg-[var(--color-accent-emerald)]',
-          },
-          {
-            title: '⭐ 北斗七星',
-            subtitle: 'Active Alerts',
-            val: '3 active',
-            stat: '2 warning · 1 err',
-            color: 'text-[var(--color-accent-amber)]',
-            bar: 'bg-[var(--color-accent-amber)]',
-          },
-          {
-            title: '🌙 太阴星',
-            subtitle: 'Uptime',
-            val: '127d 14h',
-            stat: 'since 永熙三年',
-            color: 'text-[var(--color-accent-azure)]',
-            bar: 'bg-[var(--color-accent-azure)]',
-          },
-        ].map((kpi, i) => (
+        {kpis.map((kpi, i) => (
           <div
             key={i}
             className="rounded-lg border border-[var(--color-accent-gold)]/20 bg-[var(--color-bg-secondary)] p-5"
@@ -168,57 +229,7 @@ export function TaishiMonitor() {
       <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Section 2: Six Ministries Health */}
         <div className="grid grid-cols-2 gap-4 lg:col-span-2">
-          {[
-            {
-              n: '户部',
-              head: '大司徒',
-              stat: 'Online',
-              c: 'var(--color-accent-emerald)',
-              tasks: '4 / 12',
-              time: '1.2s',
-            },
-            {
-              n: '礼部',
-              head: '大宗伯',
-              stat: 'Online',
-              c: 'var(--color-accent-emerald)',
-              tasks: '1 / 5',
-              time: '1.8s',
-            },
-            {
-              n: '兵部',
-              head: '大司马',
-              stat: 'Warning',
-              c: 'var(--color-accent-amber)',
-              tasks: '8 / 8',
-              time: '4.2s',
-              err: true,
-            },
-            {
-              n: '刑部',
-              head: '大司寇',
-              stat: 'Online',
-              c: 'var(--color-accent-emerald)',
-              tasks: '2 / 9',
-              time: '1.5s',
-            },
-            {
-              n: '工部',
-              head: '大司空',
-              stat: 'Online',
-              c: 'var(--color-accent-emerald)',
-              tasks: '5 / 15',
-              time: '2.8s',
-            },
-            {
-              n: '吏部',
-              head: '大宰',
-              stat: 'Online',
-              c: 'var(--color-accent-emerald)',
-              tasks: '0 / 3',
-              time: '1.2s',
-            },
-          ].map((m, i) => (
+          {ministries.map((m, i) => (
             <div
               key={i}
               className={`rounded-lg border bg-[var(--color-bg-secondary)] p-4 transition-colors ${m.err ? 'border-[var(--color-accent-amber)]' : 'border-[var(--color-accent-gold)]/20'}`}
@@ -237,11 +248,11 @@ export function TaishiMonitor() {
               </div>
               <div className="mb-3 space-y-1.5 text-xs text-[var(--color-text-secondary)]">
                 <div className="flex justify-between">
-                  <span>当前任务:</span>{' '}
+                  <span>{t('monitor.currentTasks')}</span>
                   <span className="text-[var(--color-text-primary)]">{m.tasks}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>平均响应:</span>{' '}
+                  <span>{t('monitor.avgResponse')}</span>
                   <span
                     className={
                       m.err
@@ -267,10 +278,10 @@ export function TaishiMonitor() {
         <div className="flex h-[320px] flex-col rounded-lg border border-[var(--color-accent-gold)]/20 bg-[var(--color-bg-secondary)] p-4">
           <div className="mb-3 flex items-center justify-between border-b border-[var(--color-accent-gold)]/20 pb-2">
             <h3 className="font-serif text-sm text-[var(--color-accent-gold)]">
-              📜 天文志 · 实时天象
+              {t('monitor.eventStream')}
             </h3>
             <button className="text-[10px] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]">
-              [暂停 ⏸]
+              {t('monitor.pause')}
             </button>
           </div>
           <div className="custom-scrollbar flex-1 space-y-3 overflow-y-auto pr-2">
@@ -299,11 +310,11 @@ export function TaishiMonitor() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="flex h-[300px] flex-col rounded-lg border border-[var(--color-accent-gold)]/20 bg-[var(--color-bg-secondary)] p-4">
           <h3 className="mb-4 font-serif text-sm text-[var(--color-accent-gold)]">
-            司天监·星轨 (24h Edict Flow)
+            {t('monitor.starTrack')}
           </h3>
           <div className="min-h-0 flex-1">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={LINE_DATA}>
+              <LineChart data={lineData}>
                 <CartesianGrid
                   strokeDasharray="3 3"
                   stroke="var(--color-text-secondary)"
@@ -332,21 +343,21 @@ export function TaishiMonitor() {
                 />
                 <Line
                   type="monotone"
-                  dataKey="创建"
+                  dataKey={chartCreatedKey}
                   stroke="var(--color-accent-gold)"
                   strokeWidth={2}
                   dot={false}
                 />
                 <Line
                   type="monotone"
-                  dataKey="办结"
+                  dataKey={chartDoneKey}
                   stroke="var(--color-accent-emerald)"
                   strokeWidth={2}
                   dot={false}
                 />
                 <Line
                   type="monotone"
-                  dataKey="封驳"
+                  dataKey={chartVetoedKey}
                   stroke="var(--color-accent-vermillion)"
                   strokeWidth={2}
                   dot={false}
@@ -358,11 +369,11 @@ export function TaishiMonitor() {
 
         <div className="flex h-[300px] flex-col rounded-lg border border-[var(--color-accent-gold)]/20 bg-[var(--color-bg-secondary)] p-4">
           <h3 className="mb-4 font-serif text-sm text-[var(--color-accent-gold)]">
-            分野·响应 (Ministry Response Time)
+            {t('monitor.responseRadar')}
           </h3>
           <div className="min-h-0 flex-1">
             <ResponsiveContainer width="100%" height="100%">
-              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={RADAR_DATA}>
+              <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
                 <PolarGrid stroke="var(--color-text-secondary)" opacity={0.3} />
                 <PolarAngleAxis
                   dataKey="subject"

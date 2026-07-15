@@ -1,23 +1,25 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Maximize2, X, Send, Mic, Trash2 } from 'lucide-react';
+import { useTranslation } from '@yyc3/i18n-react';
 
 export function AIAssistantHub() {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('对话');
+  const [activeTab, setActiveTab] = useState(t('ai.tabs.chat'));
   const [messages, setMessages] = useState([
-    { id: 1, type: 'user', text: '查看集群状态' },
+    { id: 1, type: 'user' as const, text: t('ai.status') },
     {
       id: 2,
-      type: 'assistant',
-      role: '天枢',
-      text: '【圣旨】\n朕已阅。着中书省即刻草拟方案，门下省严加审议\n— 天子御批',
+      type: 'assistant' as const,
+      role: t('ai.title'),
+      text: t('ai.receiving'),
     },
   ]);
   const [input, setInput] = useState('');
 
   const roles = ['帝', '太', '中', '门', '尚', '户', '礼', '兵', '刑', '工', '吏', '早'];
-  const tabs = ['对话', '命令', '提示词', '配置'];
+  const tabs = [t('ai.tabs.chat'), t('ai.tabs.command'), t('ai.tabs.prompt'), t('ai.tabs.config')];
 
   const handleSend = () => {
     if (!input.trim()) return;
@@ -29,8 +31,8 @@ export function AIAssistantHub() {
         {
           id: Date.now(),
           type: 'assistant',
-          role: '天枢',
-          text: '臣已收到旨意，正在处理中...',
+          role: t('ai.title'),
+          text: t('ai.receiving'),
         },
       ]);
     }, 1000);
@@ -46,7 +48,7 @@ export function AIAssistantHub() {
             exit={{ scale: 0, opacity: 0 }}
             onClick={() => setIsOpen(true)}
             className="group fixed right-8 bottom-8 z-50 flex h-14 w-14 cursor-pointer items-center justify-center rounded bg-gradient-to-br from-[var(--color-accent-gold)] to-[#8B7322] shadow-[0_0_30px_rgba(212,175,55,0.4)] transition-all hover:shadow-[0_0_40px_rgba(212,175,55,0.6)]"
-            title="王朝助理"
+            title={t('ai.buttonTitle')}
           >
             <span className="text-2xl">✨</span>
             <div className="absolute top-0 right-0 h-3 w-3 rounded-full border-2 border-[var(--color-bg-primary)] bg-[var(--color-ministry-bronze)]"></div>
@@ -68,11 +70,9 @@ export function AIAssistantHub() {
                 <span className="text-xl">🔶</span>
                 <div>
                   <h3 className="font-serif text-sm font-bold text-[var(--color-accent-gold)]">
-                    天枢 · Navigator
+                    {t('ai.title')}
                   </h3>
-                  <p className="text-[10px] text-[var(--color-text-secondary)]">
-                    Model: GPT-4o · 全局调度就绪 · 4命令
-                  </p>
+                  <p className="text-[10px] text-[var(--color-text-secondary)]">{t('ai.status')}</p>
                 </div>
               </div>
               <div className="flex items-center gap-2 text-[var(--color-text-secondary)]">
@@ -138,7 +138,7 @@ export function AIAssistantHub() {
                       <div className="whitespace-pre-wrap">{msg.text}</div>
                       <div className="mt-2 flex justify-end">
                         <button className="flex items-center gap-1 rounded bg-[var(--color-bg-primary)] px-2 py-1 text-[10px] text-[var(--color-text-secondary)] hover:text-[var(--color-accent-gold)]">
-                          📋 复制
+                          {t('ai.copy')}
                         </button>
                       </div>
                     </div>
@@ -157,14 +157,14 @@ export function AIAssistantHub() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="输入旨意... (Enter发送)"
+                placeholder={t('ai.inputPlaceholder')}
                 className="flex-1 bg-transparent text-sm text-[var(--color-text-primary)] outline-none placeholder:text-[var(--color-text-secondary)]"
               />
               <button
                 onClick={handleSend}
                 className="flex items-center gap-1 rounded bg-[var(--color-accent-gold)] px-4 py-1.5 text-sm font-medium text-[var(--color-bg-primary)] transition-colors hover:bg-[#E5C158]"
               >
-                发送
+                {t('ai.send')}
                 <Send size={14} />
               </button>
             </div>

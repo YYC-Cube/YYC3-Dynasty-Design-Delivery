@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useTranslation } from '@yyc3/i18n-react';
 
 const DYNASTIES = [
   {
@@ -52,8 +53,6 @@ const DYNASTIES = [
   { id: 'houtang', name: '后唐', period: '923-936', capital: '洛阳', desc: '同光中兴，武功极盛' },
   { id: 'houjin', name: '后晋', period: '936-947', capital: '开封', desc: '石典割地，幽云十六州' },
 ];
-
-const CATEGORIES = ['全部', '治理', '礼乐', '文韬', '革新', '盛世', '警世'];
 
 const SKILL_DATABASE = [
   {
@@ -118,31 +117,42 @@ const SKILL_DATABASE = [
   },
 ];
 
+const CATEGORY_KEYS: { key: string; tag: string }[] = [
+  { key: 'timeline.categories.all', tag: '全部' },
+  { key: 'timeline.categories.governance', tag: '治理' },
+  { key: 'timeline.categories.rites', tag: '礼乐' },
+  { key: 'timeline.categories.literature', tag: '文韬' },
+  { key: 'timeline.categories.innovation', tag: '革新' },
+  { key: 'timeline.categories.prosperity', tag: '盛世' },
+  { key: 'timeline.categories.cautionary', tag: '警世' },
+];
+
 export function TimelinePage() {
+  const { t } = useTranslation();
   const [selectedDynasty, setSelectedDynasty] = useState('tang');
-  const [selectedCat, setSelectedCat] = useState('全部');
+  const [selectedCatTag, setSelectedCatTag] = useState('全部');
   const [isLoading, setIsLoading] = useState(false);
 
   const currentDynastyInfo = DYNASTIES.find((d) => d.id === selectedDynasty);
   const currentSkills = SKILL_DATABASE.filter(
-    (s) => s.dynasty === selectedDynasty && (selectedCat === '全部' || s.tag === selectedCat),
+    (s) => s.dynasty === selectedDynasty && (selectedCatTag === '全部' || s.tag === selectedCatTag),
   );
 
   useEffect(() => {
     setIsLoading(true);
     const timer = setTimeout(() => setIsLoading(false), 600);
     return () => clearTimeout(timer);
-  }, [selectedDynasty, selectedCat]);
+  }, [selectedDynasty, selectedCatTag]);
 
   return (
     <div className="mx-auto min-h-[calc(100vh-100px)] max-w-[1000px] px-6 pt-8">
       {/* Top Section */}
       <div className="mb-8 text-center">
         <h1 className="font-serif text-3xl tracking-widest text-[var(--color-accent-gold)] drop-shadow-[0_0_10px_rgba(212,168,67,0.3)]">
-          十三王朝
+          {t('timeline.pageTitle')}
         </h1>
         <p className="mt-2 font-serif text-sm text-[var(--color-accent-gold)]/70">
-          中华文明五千年 · 智能新范式
+          {t('timeline.subtitle')}
         </p>
       </div>
 
@@ -182,7 +192,8 @@ export function TimelinePage() {
                 {currentDynastyInfo?.name}
               </h2>
               <p className="font-mono text-sm text-[var(--color-text-secondary)]">
-                {currentDynastyInfo?.period} · 都城：{currentDynastyInfo?.capital}
+                {currentDynastyInfo?.period} · {t('timeline.capitalLabel')}
+                {currentDynastyInfo?.capital}
               </p>
             </div>
             <div className="max-w-sm text-right font-serif text-lg text-[var(--color-text-primary)]">
@@ -194,17 +205,17 @@ export function TimelinePage() {
 
       {/* Category Filters */}
       <div className="mb-8 flex flex-wrap gap-3">
-        {CATEGORIES.map((cat) => (
+        {CATEGORY_KEYS.map((cat) => (
           <button
-            key={cat}
-            onClick={() => setSelectedCat(cat)}
+            key={cat.key}
+            onClick={() => setSelectedCatTag(cat.tag)}
             className={`rounded-full px-4 py-1.5 text-xs font-medium transition-all ${
-              selectedCat === cat
+              selectedCatTag === cat.tag
                 ? 'bg-[var(--color-accent-gold)] text-[var(--color-bg-primary)]'
                 : 'border border-[var(--color-accent-gold)]/20 bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]'
             }`}
           >
-            {cat}
+            {t(cat.key)}
           </button>
         ))}
       </div>
@@ -226,7 +237,7 @@ export function TimelinePage() {
               className="col-span-full py-16 text-center font-serif text-[var(--color-text-secondary)]"
             >
               <div className="mb-4 text-4xl opacity-50">☁️</div>
-              此朝代暂无可用技能
+              {t('timeline.noSkills')}
             </motion.div>
           ) : (
             currentSkills.map((skill) => (
