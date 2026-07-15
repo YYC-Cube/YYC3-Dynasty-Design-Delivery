@@ -9,8 +9,7 @@
     "isolatedModules": true,
     "moduleDetection": "force",
     "composite": true,
-    "strict": true,
-    "ignoreDeprecations": "5.0"
+    "strict": true
   },
   "include": ["vite.config.ts"]
 }
