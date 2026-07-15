@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { SealIcon } from './Icons';
+import { t } from '@/i18n';
 
 interface ImperialSealProps {
   onSeal?: () => void;
@@ -56,7 +57,7 @@ export function ImperialSeal({ onSeal, sealed = false, disabled = false, classNa
             
             {/* Seal Face */}
             <div className="w-[80%] h-[80%] border border-[var(--color-accent-vermillion)]/30 flex items-center justify-center">
-               <span className="font-serif text-[var(--color-accent-vermillion)] text-xs font-bold opacity-50">待印</span>
+               <span className="font-serif text-[var(--color-accent-vermillion)] text-xs font-bold opacity-50">{t('edict.seal.pending')}</span>
             </div>
 
             {/* Shockwave on press */}
@@ -82,7 +83,7 @@ export function ImperialSeal({ onSeal, sealed = false, disabled = false, classNa
             className="absolute z-10 w-20 h-20 border-4 border-[var(--color-accent-vermillion)] flex items-center justify-center shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)] bg-[var(--color-accent-vermillion)]/5"
           >
             <span className="font-serif text-lg leading-tight text-center writing-vertical-rl text-[var(--color-accent-vermillion)] font-bold" style={{ textShadow: "0 0 2px rgba(200,37,6,0.5)" }}>
-              受命于天<br/>既寿永昌
+              {t('edict.seal.mandate')}<br/>{t('edict.seal.prosperity')}
             </span>
           </motion.div>
         )}

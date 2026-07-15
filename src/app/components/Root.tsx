@@ -6,7 +6,7 @@ import { WorkflowProvider } from '../store/WorkflowContext';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { I18nProvider } from '@yyc3/i18n-react';
-import { i18nEngine } from '@/i18n';
+import { i18nEngine, t } from '@/i18n';
 
 export function Root() {
   return (
@@ -20,7 +20,7 @@ export function Root() {
                 fallback={
                   <div className="flex h-[60vh] items-center justify-center">
                     <span className="font-serif text-sm text-[var(--color-text-secondary)]">
-                      加载中…
+                      {t('common.loading')}
                     </span>
                   </div>
                 }

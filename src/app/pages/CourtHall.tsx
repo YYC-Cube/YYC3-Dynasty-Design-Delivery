@@ -1,15 +1,17 @@
 import { motion } from 'motion/react';
 import { Link, useNavigate } from 'react-router';
+import { useTranslation } from '@yyc3/i18n-react';
 
 export function CourtHall() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const departments = [
-    { id: 'hu', name: '户部', icon: '🧮', status: 'normal' },
-    { id: 'li', name: '礼部', icon: '📜', status: 'normal' },
-    { id: 'bing', name: '兵部', icon: '⚔️', status: 'warning' },
-    { id: 'xing', name: '刑部', icon: '⚖️', status: 'normal' },
-    { id: 'gong', name: '工部', icon: '🔨', status: 'normal' },
-    { id: 'li2', name: '吏部', icon: '👲', status: 'normal' },
+    { id: 'hu', name: t('court.ministries.hu'), icon: '🧮', status: 'normal' },
+    { id: 'li', name: t('court.ministries.li'), icon: '📜', status: 'normal' },
+    { id: 'bing', name: t('court.ministries.bing'), icon: '⚔️', status: 'warning' },
+    { id: 'xing', name: t('court.ministries.xing'), icon: '⚖️', status: 'normal' },
+    { id: 'gong', name: t('court.ministries.gong'), icon: '🔨', status: 'normal' },
+    { id: 'li2', name: t('court.ministries.li2'), icon: '👲', status: 'normal' },
   ];
 
   return (
@@ -23,7 +25,7 @@ export function CourtHall() {
         <div className="col-span-12 hidden space-y-4 lg:col-span-3 lg:block xl:col-span-2">
           <h2 className="mb-6 flex items-center gap-2 font-serif text-sm font-bold text-[var(--color-accent-gold)]">
             <span className="h-4 w-1.5 rounded-sm bg-[var(--color-accent-gold)]"></span>
-            待办事务
+            {t('court.todoTitle')}
           </h2>
           {[1, 2, 3, 4].map((i) => (
             <div
@@ -32,13 +34,15 @@ export function CourtHall() {
             >
               <div className="mb-2 flex items-start justify-between">
                 <span className="text-xs font-medium text-[var(--color-text-primary)] group-hover:text-[var(--color-accent-gold)]">
-                  紧急敕令
+                  {t('court.urgentEdict')}
                 </span>
                 <span className="font-mono text-[10px] text-[var(--color-text-secondary)]">
                   #00{i}
                 </span>
               </div>
-              <div className="text-[10px] text-[var(--color-text-secondary)]">剩余时间: 2时辰</div>
+              <div className="text-[10px] text-[var(--color-text-secondary)]">
+                {t('court.timeRemaining')}
+              </div>
             </div>
           ))}
         </div>
@@ -63,22 +67,30 @@ export function CourtHall() {
               <span className="text-xl">👑</span>
             </div>
             <h3 className="mt-4 font-serif text-xl font-bold text-[var(--color-accent-gold)]">
-              天堂
+              {t('court.heavenNode')}
             </h3>
-            <p className="mt-1 mb-4 text-xs text-[var(--color-text-secondary)]">皇帝 · 决策</p>
+            <p className="mt-1 mb-4 text-xs text-[var(--color-text-secondary)]">
+              {t('court.emperorRole')}
+            </p>
             <div className="font-mono text-3xl font-light text-[var(--color-text-primary)]">
               98<span className="text-sm">%</span>
             </div>
-            <p className="mt-1 text-[10px] text-[var(--color-ministry-bronze)]">全局健康度</p>
+            <p className="mt-1 text-[10px] text-[var(--color-ministry-bronze)]">
+              {t('court.globalHealth')}
+            </p>
           </Link>
 
           {/* 2. Mingtang (Prince) */}
           <div className="relative z-10 mt-10 flex h-32 w-52 flex-col items-center justify-center rounded border border-[var(--color-accent-gold)]/50 bg-[var(--color-bg-secondary)] transition-colors hover:border-[var(--color-accent-gold)]">
-            <h3 className="font-serif text-lg text-[var(--color-text-primary)]">🎎 明堂</h3>
-            <p className="mt-1 text-xs text-[var(--color-text-secondary)]">太子 · 承旨分拣</p>
+            <h3 className="font-serif text-lg text-[var(--color-text-primary)]">
+              🎎 {t('court.mingtangNode')}
+            </h3>
+            <p className="mt-1 text-xs text-[var(--color-text-secondary)]">
+              {t('court.princeRole')}
+            </p>
             <div className="mt-3 flex gap-4 text-xs">
-              <span className="text-[var(--color-accent-gold)]">待分拣: 12</span>
-              <span className="text-[var(--color-ministry-azure)]">总旨意: 145</span>
+              <span className="text-[var(--color-accent-gold)]">{t('court.pendingSort')}</span>
+              <span className="text-[var(--color-ministry-azure)]">{t('court.totalEdicts')}</span>
             </div>
           </div>
 
@@ -86,31 +98,37 @@ export function CourtHall() {
           <div className="relative z-10 mt-10 flex gap-2">
             <div className="flex h-44 w-40 cursor-pointer flex-col items-center justify-center rounded border-t-4 border-[var(--color-ministry-azure)] bg-[var(--color-bg-secondary)] p-4 hover:bg-[var(--color-bg-secondary)]/80">
               <span className="mb-2 text-xl">📜</span>
-              <h4 className="font-serif text-[var(--color-text-primary)]">中书省</h4>
+              <h4 className="font-serif text-[var(--color-text-primary)]">
+                {t('court.zhongshuNode')}
+              </h4>
               <p className="mt-1 text-center text-[10px] text-[var(--color-text-secondary)]">
-                草拟方案
+                {t('court.zhongshuDuty')}
                 <br />
-                左阙
+                {t('court.leftGate')}
               </p>
               <div className="mt-4 h-2 w-2 animate-pulse rounded-full bg-[var(--color-ministry-bronze)]"></div>
             </div>
             <div className="flex h-44 w-40 cursor-pointer flex-col items-center justify-center rounded border-t-4 border-[var(--color-accent-gold)] bg-[var(--color-bg-secondary)] p-4 hover:bg-[var(--color-bg-secondary)]/80">
               <span className="mb-2 text-xl">🔍</span>
-              <h4 className="font-serif text-[var(--color-text-primary)]">门下省</h4>
+              <h4 className="font-serif text-[var(--color-text-primary)]">
+                {t('court.menxiaNode')}
+              </h4>
               <p className="mt-1 text-center text-[10px] text-[var(--color-text-secondary)]">
-                审议封驳
+                {t('court.menxiaDuty')}
                 <br />
-                中阙
+                {t('court.centerGate')}
               </p>
               <div className="mt-4 h-2 w-2 animate-pulse rounded-full bg-[var(--color-ministry-bronze)]"></div>
             </div>
             <div className="flex h-44 w-40 cursor-pointer flex-col items-center justify-center rounded border-t-4 border-[var(--color-ministry-bronze)] bg-[var(--color-bg-secondary)] p-4 hover:bg-[var(--color-bg-secondary)]/80">
               <span className="mb-2 text-xl">📮</span>
-              <h4 className="font-serif text-[var(--color-text-primary)]">尚书省</h4>
+              <h4 className="font-serif text-[var(--color-text-primary)]">
+                {t('court.shangshuNode')}
+              </h4>
               <p className="mt-1 text-center text-[10px] text-[var(--color-text-secondary)]">
-                政令派发
+                {t('court.shangshuDuty')}
                 <br />
-                右阙
+                {t('court.rightGate')}
               </p>
               <div className="mt-4 h-2 w-2 animate-pulse rounded-full bg-[var(--color-ministry-bronze)]"></div>
             </div>
@@ -135,8 +153,8 @@ export function CourtHall() {
                     ></span>
                   </div>
                   <div className="flex justify-between text-[10px] text-[var(--color-text-secondary)]">
-                    <span>任务: 3</span>
-                    <span>令牌: 5/10</span>
+                    <span>{t('court.taskCount')}</span>
+                    <span>{t('court.tokenCount')}</span>
                   </div>
                 </Link>
               ))}
@@ -148,15 +166,21 @@ export function CourtHall() {
             onClick={() => navigate('/archive')}
             className="relative z-10 mt-10 flex h-32 w-60 cursor-pointer flex-col items-center justify-center rounded-t-lg border-b-8 border-[var(--color-accent-gold)] bg-[var(--color-bg-secondary)] p-4 transition-colors hover:bg-[#32284D]"
           >
-            <h3 className="mb-4 font-serif text-[var(--color-accent-gold)]">定鼎门 (奏折阁)</h3>
+            <h3 className="mb-4 font-serif text-[var(--color-accent-gold)]">
+              {t('court.dingdingNode')}
+            </h3>
             <div className="grid w-full grid-cols-2 gap-x-6 gap-y-2 text-center">
               <div>
                 <div className="font-mono text-lg text-[var(--color-text-primary)]">92%</div>
-                <div className="text-[10px] text-[var(--color-text-secondary)]">办结率</div>
+                <div className="text-[10px] text-[var(--color-text-secondary)]">
+                  {t('court.completionRate')}
+                </div>
               </div>
               <div>
                 <div className="font-mono text-lg text-[var(--color-text-primary)]">1.2h</div>
-                <div className="text-[10px] text-[var(--color-text-secondary)]">均耗时</div>
+                <div className="text-[10px] text-[var(--color-text-secondary)]">
+                  {t('court.avgDuration')}
+                </div>
               </div>
             </div>
           </div>
@@ -167,12 +191,16 @@ export function CourtHall() {
           <div>
             <h2 className="mb-4 flex items-center gap-2 font-serif text-sm font-bold text-[var(--color-accent-gold)]">
               <span className="h-4 w-1.5 rounded-sm bg-[var(--color-accent-gold)]"></span>
-              系统状态
+              {t('court.systemStatus')}
             </h2>
             <div className="rounded bg-[var(--color-bg-secondary)] p-4">
               <div className="mb-4 flex items-center justify-between">
-                <span className="text-xs text-[var(--color-text-primary)]">核心链路</span>
-                <span className="text-xs text-[var(--color-ministry-bronze)]">正常</span>
+                <span className="text-xs text-[var(--color-text-primary)]">
+                  {t('court.coreLink')}
+                </span>
+                <span className="text-xs text-[var(--color-ministry-bronze)]">
+                  {t('court.normal')}
+                </span>
               </div>
               <div className="flex gap-1">
                 {[1, 2, 3].map((i) => (
@@ -188,36 +216,40 @@ export function CourtHall() {
           <div>
             <h2 className="mb-4 flex items-center gap-2 font-serif text-sm font-bold text-[var(--color-accent-gold)]">
               <span className="h-4 w-1.5 rounded-sm bg-[var(--color-accent-gold)]"></span>
-              早朝简报
+              {t('court.morningBrief')}
             </h2>
             <div className="relative overflow-hidden rounded bg-[var(--color-bg-secondary)] p-4 text-xs leading-relaxed text-[var(--color-text-primary)]">
               <div className="absolute top-0 right-0 flex h-8 w-8 items-center justify-center rounded-bl-lg bg-[var(--color-accent-gold)]/10">
                 <span className="text-sm">🌅</span>
               </div>
-              <p>昨日共下发旨意 145 道，办结 132 道。</p>
-              <p className="mt-2 text-[var(--color-accent-gold)]">兵部并发任务较高，建议调配。</p>
+              <p>{t('court.morningBriefContent')}</p>
+              <p className="mt-2 text-[var(--color-accent-gold)]">
+                {t('court.morningBriefHighlight')}
+              </p>
             </div>
           </div>
 
-          {/* 天子驾六 组件 */}
+          {/* 天子驾六 */}
           <div className="relative overflow-hidden rounded border border-[var(--color-accent-gold)]/30 bg-[var(--color-bg-secondary)] p-4">
-            <h3 className="mb-3 font-serif text-xs text-[var(--color-accent-gold)]">天子驾六</h3>
+            <h3 className="mb-3 font-serif text-xs text-[var(--color-accent-gold)]">
+              {t('court.emperorChariot')}
+            </h3>
             <div className="mb-2 flex justify-center gap-2">
               <div className="grid grid-cols-3 gap-1">
                 {[1, 2, 3, 4, 5, 6].map((i) => (
                   <div
                     key={i}
                     className={`h-3 w-4 rounded-sm ${i === 3 ? 'animate-pulse bg-[var(--color-accent-gold)]' : 'bg-[var(--color-ministry-bronze)]'}`}
-                    title={`马 ${i}`}
+                    title={`${t('court.horse')} ${i}`}
                   ></div>
                 ))}
               </div>
               <div className="flex h-8 w-8 items-center justify-center rounded-sm border-2 border-[var(--color-accent-gold)] text-[10px] text-[var(--color-accent-gold)]">
-                舆
+                {t('court.chariot')}
               </div>
             </div>
             <p className="mt-2 text-center text-[10px] text-[var(--color-text-secondary)]">
-              兵部高负载中
+              {t('court.bingbuLoad')}
             </p>
           </div>
         </div>

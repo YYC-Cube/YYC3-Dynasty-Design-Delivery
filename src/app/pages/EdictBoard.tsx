@@ -11,59 +11,48 @@ import { ImperialSeal } from '../components/ui/ImperialSeal';
 import { useModalDismiss } from '../components/ui/useModalDismiss';
 import { useTranslation } from '@yyc3/i18n-react';
 
-interface KanbanColumn {
-  id: EdictStatus;
-  label: string;
-  min: string;
-}
-
-const COLUMNS: KanbanColumn[] = [
-  { id: '待承旨', label: '天堂 (待承旨)', min: '天' },
-  { id: '待草拟', label: '中书 (待草拟)', min: '中' },
-  { id: '待审议', label: '门下 (待审议)', min: '门' },
-  { id: '待派发', label: '尚书 (待派发)', min: '尚' },
-  { id: '执行中', label: '六部 (执行中)', min: '部' },
-  { id: '待回奏', label: '六部 (待回奏)', min: '奏' },
-  { id: '已办结', label: '定鼎门 (已办结)', min: '结' },
+const COLUMN_IDS: EdictStatus[] = [
+  '待承旨',
+  '待草拟',
+  '待审议',
+  '待派发',
+  '执行中',
+  '待回奏',
+  '已办结',
 ];
 
 // Transition action labels for each status→status pair
-const TRANSITION_LABELS: Record<string, string> = {
-  '待承旨→待草拟': '承旨分拣',
-  '待草拟→待审议': '提交草拟',
-  '待审议→待派发': '准奏',
-  '待审议→待草拟': '封驳',
-  '待派发→执行中': '核发鱼符',
-  '待派发→待执行': '排队待命',
-  '待执行→执行中': '领命开工',
-  '执行中→待回奏': '办结',
-  '执行中→已办结': '直接办结',
-  '待回奏→已办结': '上呈回奏',
-  '待回奏→待审议': '申请重审',
-  '待回奏→执行中': '打回重做',
-  '待复核→已办结': '复核通过',
-  '待复核→待回奏': '复核驳回',
-  '阻塞中→待草拟': '解除→中书省',
-  '阻塞中→待审议': '解除→门下省',
-  '阻塞中→待派发': '解除→尚书省',
-  '阻塞中→待执行': '解除→排队',
-  '阻塞中→执行中': '解除→执行',
-  '阻塞中→待回奏': '解除→待回奏',
+const TRANSITION_KEYS: Record<string, string> = {
+  '待承旨→待草拟': 'intakeToDraft',
+  '待草拟→待审议': 'draftToReview',
+  '待审议→待派发': 'reviewToApprove',
+  '待审议→待草拟': 'reviewToReject',
+  '待派发→执行中': 'dispatchToExecute',
+  '待派发→待执行': 'dispatchToQueue',
+  '待执行→执行中': 'queueToExecute',
+  '执行中→待回奏': 'executeToReport',
+  '执行中→已办结': 'executeToDone',
+  '待回奏→已办结': 'reportToDone',
+  '待回奏→待审议': 'reportToReview',
+  '待回奏→执行中': 'reportToExecute',
+  '待复核→已办结': 'confirmApprove',
+  '待复核→待回奏': 'confirmReject',
+  '阻塞中→待草拟': 'unblockToDraft',
+  '阻塞中→待审议': 'unblockToReview',
+  '阻塞中→待派发': 'unblockToDispatch',
+  '阻塞中→待执行': 'unblockToQueue',
+  '阻塞中→执行中': 'unblockToExecute',
+  '阻塞中→待回奏': 'unblockToReport',
 };
 
 // ── Off-pipeline states (shown in a compact tray, not main columns) ──
-interface OffPipelineTray {
-  id: EdictStatus;
-  label: string;
-  accent: string;
-}
-
-const OFF_PIPELINE_TRAYS: OffPipelineTray[] = [
-  { id: '待执行', label: '待执行', accent: 'var(--color-accent-azure)' },
-  { id: '待复核', label: '待复核', accent: 'var(--color-accent-amber)' },
-  { id: '阻塞中', label: '阻塞中', accent: 'var(--color-accent-vermillion)' },
-  { id: '已撤销', label: '已撤销', accent: 'var(--color-text-secondary)' },
-];
+const OFF_PIPELINE_IDS: EdictStatus[] = ['待执行', '待复核', '阻塞中', '已撤销'];
+const OFF_PIPELINE_ACCENTS: Partial<Record<EdictStatus, string>> = {
+  待执行: 'var(--color-accent-azure)',
+  待复核: 'var(--color-accent-amber)',
+  阻塞中: 'var(--color-accent-vermillion)',
+  已撤销: 'var(--color-text-secondary)',
+};
 
 export function EdictBoard() {
   const { state, dispatch } = useWorkflow();
@@ -125,11 +114,11 @@ export function EdictBoard() {
 
       {/* Kanban Board */}
       <div className="custom-scrollbar flex flex-1 gap-4 overflow-x-auto pb-4">
-        {COLUMNS.map((col) => (
+        {COLUMN_IDS.map((colId) => (
           <KanbanColumn
-            key={col.id}
-            column={col}
-            edicts={state.edicts.filter((e) => e.status === col.id)}
+            key={colId}
+            columnId={colId}
+            edicts={state.edicts.filter((e) => e.status === colId)}
             onSelect={setSelectedId}
           />
         ))}
@@ -137,26 +126,25 @@ export function EdictBoard() {
 
       {/* Off-Pipeline Tray (待执行/待复核/阻塞中/已撤销) */}
       {(() => {
-        const offPipelineEdicts = state.edicts.filter((e) =>
-          OFF_PIPELINE_TRAYS.some((t) => t.id === e.status),
-        );
+        const offPipelineEdicts = state.edicts.filter((e) => OFF_PIPELINE_IDS.includes(e.status));
         if (offPipelineEdicts.length === 0) return null;
         return (
           <div className="mt-2 flex shrink-0 gap-2 border-t border-[var(--color-bg-secondary)] pt-3">
-            {OFF_PIPELINE_TRAYS.map((tray) => {
-              const trayEdicts = offPipelineEdicts.filter((e) => e.status === tray.id);
+            {OFF_PIPELINE_IDS.map((trayId) => {
+              const trayEdicts = offPipelineEdicts.filter((e) => e.status === trayId);
               if (trayEdicts.length === 0) return null;
+              const accent = OFF_PIPELINE_ACCENTS[trayId];
               return (
                 <div
-                  key={tray.id}
+                  key={trayId}
                   className="flex items-center gap-1 rounded border px-2 py-1"
                   style={{
-                    borderColor: `${tray.accent}40`,
-                    backgroundColor: `${tray.accent}0D`,
+                    borderColor: `${accent}40`,
+                    backgroundColor: `${accent}0D`,
                   }}
                 >
-                  <span className="text-xs font-medium" style={{ color: tray.accent }}>
-                    {tray.label}
+                  <span className="text-xs font-medium" style={{ color: accent }}>
+                    {t(`edict.offPipeline.${trayId}`)}
                   </span>
                   <span className="font-mono text-[10px] text-[var(--color-text-secondary)]">
                     {trayEdicts.length}
@@ -236,7 +224,7 @@ export function EdictBoard() {
                             draftType === edictType ? 'text-[var(--color-accent-gold)]' : ''
                           }
                         >
-                          {edictType}
+                          {t(`edict.type.${edictType}`)}
                         </span>
                       </label>
                     ))}
@@ -295,23 +283,24 @@ export function EdictBoard() {
 }
 
 function KanbanColumn({
-  column,
+  columnId,
   edicts,
   onSelect,
 }: {
-  column: KanbanColumn;
+  columnId: EdictStatus;
   edicts: Edict[];
   onSelect: (id: string) => void;
 }) {
   const { dispatch } = useWorkflow();
+  const { t } = useTranslation();
 
   const [{ isOver }, dropRef] = useDrop({
     accept: 'EDICT',
     drop: (item: { id: string; currentStatus: EdictStatus }) => {
-      if (item.currentStatus === column.id) return;
+      if (item.currentStatus === columnId) return;
       dispatch({
         type: 'TRANSITION_EDICT',
-        payload: { id: item.id, target: column.id, operator: '操作员' },
+        payload: { id: item.id, target: columnId, operator: '操作员' },
       });
     },
     collect: (monitor) => ({
@@ -325,7 +314,9 @@ function KanbanColumn({
       className={`flex w-[280px] shrink-0 flex-col overflow-hidden rounded-lg border bg-[#1A142A] transition-colors ${isOver ? 'border-[var(--color-accent-gold)]' : 'border-[var(--color-bg-secondary)]'}`}
     >
       <div className="flex items-center justify-between border-b border-[var(--color-bg-primary)] bg-[var(--color-bg-secondary)] px-4 py-3">
-        <span className="font-serif text-sm text-[var(--color-accent-gold)]">{column.label}</span>
+        <span className="font-serif text-sm text-[var(--color-accent-gold)]">
+          {t(`edict.columnLabels.${columnId}`)}
+        </span>
         <span className="rounded bg-[var(--color-bg-primary)] px-2 py-0.5 font-mono text-xs text-[var(--color-bamboo-brown)]">
           {edicts.length}
         </span>
@@ -340,6 +331,7 @@ function KanbanColumn({
 }
 
 function EdictCard({ edict, onClick }: { edict: Edict; onClick: () => void }) {
+  const { t } = useTranslation();
   const [{ isDragging }, dragRef] = useDrag({
     type: 'EDICT',
     item: { id: edict.id, currentStatus: edict.status },
@@ -364,7 +356,7 @@ function EdictCard({ edict, onClick }: { edict: Edict; onClick: () => void }) {
                 : 'bg-[var(--color-text-primary)]/10 text-[var(--color-text-primary)]'
           }`}
         >
-          <EdictIcon className="h-3 w-3" /> {edict.type}
+          <EdictIcon className="h-3 w-3" /> {t(`edict.type.${edict.type}`)}
         </span>
         <span className="font-mono text-[10px] text-[var(--color-text-secondary)]">
           #{edict.id.split('-')[1]}
@@ -378,7 +370,7 @@ function EdictCard({ edict, onClick }: { edict: Edict; onClick: () => void }) {
           {edict.seal && (
             <>
               <FishTokenIcon className="h-4 w-4 text-[var(--color-accent-gold)]" />
-              <span className="sr-only">已盖玺发牌</span>
+              <span className="sr-only">{t('edict.sealedHint')}</span>
             </>
           )}
         </div>
@@ -406,10 +398,12 @@ function WorkflowActions({ edict }: { edict: Edict }) {
       <div className="mt-4 flex w-full items-end justify-between gap-6 border-t border-[var(--color-accent-amber)]/30 pt-6">
         <div className="flex-1">
           <p className="mb-2 font-serif text-xs font-bold text-[var(--color-accent-amber)]">
-            待{edict.pendingConfirm.confirmBy}复核
+            {t('edict.pendingConfirmTitle')}
           </p>
           <p className="mb-3 text-xs text-[var(--color-text-secondary)]">
-            请求流转至「{edict.pendingConfirm.targetState}」
+            {t('edict.pendingConfirmPrefix')}「
+            {t(`edict.status.${edict.pendingConfirm.targetState}`)}」
+            {t('edict.pendingConfirmSuffix')}
           </p>
           <div className="flex gap-2">
             <button
@@ -421,18 +415,18 @@ function WorkflowActions({ edict }: { edict: Edict }) {
               }
               className="rounded border border-[var(--color-accent-gold)]/50 bg-[var(--color-bg-secondary)] px-4 py-2 text-xs text-[var(--color-accent-gold)] hover:bg-[var(--color-accent-gold)]/20"
             >
-              复核通过
+              {t('edict.approve')}
             </button>
             <button
               onClick={() =>
                 dispatch({
                   type: 'CONFIRM_EDICT',
-                  payload: { id: edict.id, action: 'reject', reason: '需要修改' },
+                  payload: { id: edict.id, action: 'reject', reason: t('edict.rejectReason') },
                 })
               }
               className="rounded border border-[var(--color-accent-vermillion)]/50 bg-[var(--color-bg-primary)] px-4 py-2 text-xs text-[var(--color-accent-vermillion)] hover:bg-[var(--color-accent-vermillion)]/20"
             >
-              复核驳回
+              {t('edict.reject')}
             </button>
           </div>
         </div>
@@ -444,11 +438,14 @@ function WorkflowActions({ edict }: { edict: Edict }) {
     <div className="mt-4 flex w-full items-end justify-between gap-6 border-t border-[var(--color-accent-gold)]/20 pt-6">
       <div className="flex-1">
         <p className="mb-2 font-serif text-xs font-bold text-[var(--color-bamboo-brown)]">
-          {t('edict.workflowActionsLabel')} · 当前值守：{org}
+          {t('edict.workflowActionsLabel')} · {t('edict.currentOrgPrefix')}：{org}
         </p>
         <div className="flex flex-wrap gap-2">
           {validTargets.map((target) => {
-            const label = TRANSITION_LABELS[`${edict.status}→${target}`] || `→ ${target}`;
+            const transitionKey = TRANSITION_KEYS[`${edict.status}→${target}`];
+            const label = transitionKey
+              ? t(`edict.transition.${transitionKey}`)
+              : t(`edict.status.${target}`);
             const isDanger = target === '已撤销' || target === '待草拟';
             const isBlock = target === '阻塞中';
             return (
@@ -473,7 +470,9 @@ function WorkflowActions({ edict }: { edict: Edict }) {
             );
           })}
           {validTargets.length === 0 && (
-            <span className="text-xs text-[var(--color-text-secondary)]">此状态无可用流转</span>
+            <span className="text-xs text-[var(--color-text-secondary)]">
+              {t('edict.noActions')}
+            </span>
           )}
         </div>
       </div>

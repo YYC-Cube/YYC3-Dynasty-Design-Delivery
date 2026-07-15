@@ -1,14 +1,17 @@
 import React from 'react';
 import { useNavigate } from 'react-router';
 import { motion } from 'motion/react';
-import { useWorkflow, HistoryLog } from '../store/WorkflowContext';
+import { useWorkflow } from '../store/WorkflowContext';
+import type { HistoryLog } from '../domain';
 import { BambooIcon, EdictIcon } from '../components/ui/Icons';
 import { ImperialEdict } from '../components/ui/ImperialEdict';
 import { useModalDismiss } from '../components/ui/useModalDismiss';
+import { useTranslation } from '@yyc3/i18n-react';
 
 export function ArchiveBoard() {
   const { state } = useWorkflow();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
 
   const completedEdicts = state.edicts.filter((e) => e.status === '已办结');
@@ -31,18 +34,16 @@ export function ArchiveBoard() {
       <div className="mb-6 flex shrink-0 items-end justify-between border-b border-[var(--color-accent-gold)]/20 pb-4">
         <div>
           <h2 className="mb-2 flex items-center gap-2 font-serif text-2xl text-[var(--color-accent-gold)]">
-            <BambooIcon className="h-6 w-6" /> 定鼎门 · 奏折阁
+            <BambooIcon className="h-6 w-6" /> {t('archive.title')}
           </h2>
-          <p className="text-sm text-[var(--color-text-secondary)]">
-            查看已办结任务的完整流转回溯与史料归档
-          </p>
+          <p className="text-sm text-[var(--color-text-secondary)]">{t('archive.desc')}</p>
         </div>
         <div className="flex gap-4">
           <button
             onClick={() => navigate('/edict')}
             className="rounded border border-[var(--color-accent-gold)]/50 bg-[var(--color-bg-secondary)] px-4 py-2 text-sm font-medium text-[var(--color-accent-gold)] transition-colors hover:bg-[var(--color-accent-gold)]/20"
           >
-            返回旨意工坊
+            {t('archive.backToEdict')}
           </button>
         </div>
       </div>
@@ -50,7 +51,7 @@ export function ArchiveBoard() {
       {completedEdicts.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center text-[var(--color-text-secondary)]">
           <BambooIcon className="mb-4 h-16 w-16 opacity-20" />
-          <p className="font-serif text-lg">尚无已归档的奏折</p>
+          <p className="font-serif text-lg">{t('archive.empty')}</p>
         </div>
       ) : (
         <div className="custom-scrollbar flex-1 space-y-6 overflow-y-auto pr-4">
@@ -65,7 +66,7 @@ export function ArchiveBoard() {
               <div className="flex w-[300px] shrink-0 flex-col border-r border-[var(--color-text-secondary)]/20 pr-6">
                 <div className="mb-4 flex items-center justify-between">
                   <span className="flex w-fit items-center gap-1 rounded bg-[var(--color-accent-gold)]/20 px-2 py-0.5 text-[10px] text-[var(--color-accent-gold)]">
-                    <EdictIcon className="h-3 w-3" /> {edict.type}
+                    <EdictIcon className="h-3 w-3" /> {t(`edict.type.${edict.type}`)}
                   </span>
                   <span className="font-mono text-xs text-[var(--color-text-secondary)]">
                     #{edict.id.split('-')[1]}
@@ -79,14 +80,14 @@ export function ArchiveBoard() {
                     onClick={() => setSelectedId(edict.id)}
                     className="w-full rounded border border-[var(--color-text-secondary)]/50 bg-[var(--color-bg-secondary)] px-4 py-2 text-sm text-[var(--color-text-primary)] transition-colors hover:border-[var(--color-accent-gold)] hover:text-[var(--color-accent-gold)]"
                   >
-                    查阅原文
+                    {t('archive.viewOriginal')}
                   </button>
                 </div>
               </div>
 
               <div className="flex-1">
                 <h4 className="mb-4 font-serif text-sm text-[var(--color-bamboo-brown)]">
-                  全链路流转回溯
+                  {t('archive.historyTitle')}
                 </h4>
                 <div className="relative">
                   <div className="absolute top-2 bottom-2 left-2 w-px bg-[var(--color-accent-gold)]/20"></div>
@@ -144,9 +145,9 @@ export function ArchiveBoard() {
                   className="writing-vertical-rl text-center font-serif text-lg leading-tight font-bold text-[var(--color-accent-vermillion)]"
                   style={{ textShadow: '0 0 2px rgba(200,37,6,0.5)' }}
                 >
-                  受命于天
+                  {t('archive.sealMandate')}
                   <br />
-                  既寿永昌
+                  {t('archive.sealProsperity')}
                 </span>
               </div>
             </div>
