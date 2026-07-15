@@ -51,8 +51,19 @@ const TRANSITION_LABELS: Record<string, string> = {
   '阻塞中→待回奏': '解除→待回奏',
 };
 
-// Which statuses can be blocked
-const _BLOCKABLE_STATUSES: EdictStatus[] = ['待草拟', '待派发', '待执行', '执行中'];
+// ── Off-pipeline states (shown in a compact tray, not main columns) ──
+interface OffPipelineTray {
+  id: EdictStatus;
+  label: string;
+  accent: string;
+}
+
+const OFF_PIPELINE_TRAYS: OffPipelineTray[] = [
+  { id: '待执行', label: '待执行', accent: 'var(--color-accent-azure)' },
+  { id: '待复核', label: '待复核', accent: 'var(--color-accent-amber)' },
+  { id: '阻塞中', label: '阻塞中', accent: 'var(--color-accent-vermillion)' },
+  { id: '已撤销', label: '已撤销', accent: 'var(--color-text-secondary)' },
+];
 
 export function EdictBoard() {
   const { state, dispatch } = useWorkflow();
@@ -123,6 +134,49 @@ export function EdictBoard() {
           />
         ))}
       </div>
+
+      {/* Off-Pipeline Tray (待执行/待复核/阻塞中/已撤销) */}
+      {(() => {
+        const offPipelineEdicts = state.edicts.filter((e) =>
+          OFF_PIPELINE_TRAYS.some((t) => t.id === e.status),
+        );
+        if (offPipelineEdicts.length === 0) return null;
+        return (
+          <div className="mt-2 flex shrink-0 gap-2 border-t border-[var(--color-bg-secondary)] pt-3">
+            {OFF_PIPELINE_TRAYS.map((tray) => {
+              const trayEdicts = offPipelineEdicts.filter((e) => e.status === tray.id);
+              if (trayEdicts.length === 0) return null;
+              return (
+                <div
+                  key={tray.id}
+                  className="flex items-center gap-1 rounded border px-2 py-1"
+                  style={{
+                    borderColor: `${tray.accent}40`,
+                    backgroundColor: `${tray.accent}0D`,
+                  }}
+                >
+                  <span className="text-xs font-medium" style={{ color: tray.accent }}>
+                    {tray.label}
+                  </span>
+                  <span className="font-mono text-[10px] text-[var(--color-text-secondary)]">
+                    {trayEdicts.length}
+                  </span>
+                  {trayEdicts.map((e) => (
+                    <button
+                      key={e.id}
+                      onClick={() => setSelectedId(e.id)}
+                      className="ml-1 max-w-[120px] truncate rounded bg-[var(--color-bg-primary)] px-1.5 py-0.5 text-[10px] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+                      title={e.title}
+                    >
+                      {e.title}
+                    </button>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        );
+      })()}
 
       {/* Edict Modal */}
       <AnimatePresence>
