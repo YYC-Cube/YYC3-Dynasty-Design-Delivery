@@ -7,6 +7,7 @@ import { ArchiveBoard } from './pages/ArchiveBoard';
 import { TimelinePage } from './pages/TimelinePage';
 import { TaishiMonitor } from './pages/TaishiMonitor';
 import { PlaceholderPage } from './pages/PlaceholderPage';
+import { HonorsPage } from './pages/HonorsPage';
 import { DashboardPage } from './dashboard/DashboardPage';
 
 export const router = createBrowserRouter([
@@ -21,7 +22,7 @@ export const router = createBrowserRouter([
       { path: 'archive', Component: ArchiveBoard },
       { path: 'timeline', Component: TimelinePage },
       { path: 'monitor', Component: TaishiMonitor },
-      { path: 'honors', Component: PlaceholderPage },
+      { path: 'honors', Component: HonorsPage },
       { path: 'skills', Component: PlaceholderPage },
       { path: 'workflow', Component: PlaceholderPage },
       { path: 'bridge', Component: PlaceholderPage },

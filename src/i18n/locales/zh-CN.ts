@@ -64,15 +64,19 @@ export const zhCN = {
     draftCancel: '取消',
     draftSubmit: '降旨',
     workflowActionsLabel: '流转操作',
-    // 7-stage status labels
+    // Canonical status labels (10 states)
     status: {
       待承旨: '待承旨',
       待草拟: '待草拟',
       待审议: '待审议',
       待派发: '待派发',
+      待执行: '待执行',
       执行中: '执行中',
       待回奏: '待回奏',
+      待复核: '待复核',
       已办结: '已办结',
+      阻塞中: '阻塞中',
+      已撤销: '已撤销',
     },
     // Column labels (combine stage + node)
     columnLabels: {
@@ -80,9 +84,13 @@ export const zhCN = {
       待草拟: '中书 (待草拟)',
       待审议: '门下 (待审议)',
       待派发: '尚书 (待派发)',
+      待执行: '六部 (待执行)',
       执行中: '六部 (执行中)',
       待回奏: '六部 (待回奏)',
+      待复核: '门下 (待复核)',
       已办结: '定鼎门 (已办结)',
+      阻塞中: '阻塞中',
+      已撤销: '已撤销',
     },
   },
 

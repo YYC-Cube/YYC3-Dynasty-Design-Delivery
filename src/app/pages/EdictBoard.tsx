@@ -1,7 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { useWorkflow, Edict, EdictStatus } from '../store/WorkflowContext';
+import { useWorkflow } from '../store/WorkflowContext';
+import type { Edict, EdictStatus } from '../domain';
+import { getValidTransitions, STATE_ORG_MAP } from '../domain';
 import { useDrag, useDrop } from 'react-dnd';
 import { EdictIcon, BambooIcon, FishTokenIcon } from '../components/ui/Icons';
 import { ImperialEdict } from '../components/ui/ImperialEdict';
@@ -24,6 +26,33 @@ const COLUMNS: KanbanColumn[] = [
   { id: '待回奏', label: '六部 (待回奏)', min: '奏' },
   { id: '已办结', label: '定鼎门 (已办结)', min: '结' },
 ];
+
+// Transition action labels for each status→status pair
+const TRANSITION_LABELS: Record<string, string> = {
+  '待承旨→待草拟': '承旨分拣',
+  '待草拟→待审议': '提交草拟',
+  '待审议→待派发': '准奏',
+  '待审议→待草拟': '封驳',
+  '待派发→执行中': '核发鱼符',
+  '待派发→待执行': '排队待命',
+  '待执行→执行中': '领命开工',
+  '执行中→待回奏': '办结',
+  '执行中→已办结': '直接办结',
+  '待回奏→已办结': '上呈回奏',
+  '待回奏→待审议': '申请重审',
+  '待回奏→执行中': '打回重做',
+  '待复核→已办结': '复核通过',
+  '待复核→待回奏': '复核驳回',
+  '阻塞中→待草拟': '解除→中书省',
+  '阻塞中→待审议': '解除→门下省',
+  '阻塞中→待派发': '解除→尚书省',
+  '阻塞中→待执行': '解除→排队',
+  '阻塞中→执行中': '解除→执行',
+  '阻塞中→待回奏': '解除→待回奏',
+};
+
+// Which statuses can be blocked
+const _BLOCKABLE_STATUSES: EdictStatus[] = ['待草拟', '待派发', '待执行', '执行中'];
 
 export function EdictBoard() {
   const { state, dispatch } = useWorkflow();
@@ -224,10 +253,11 @@ function KanbanColumn({
 
   const [{ isOver }, dropRef] = useDrop({
     accept: 'EDICT',
-    drop: (item: { id: string }) => {
+    drop: (item: { id: string; currentStatus: EdictStatus }) => {
+      if (item.currentStatus === column.id) return;
       dispatch({
-        type: 'UPDATE_EDICT_STATUS',
-        payload: { id: item.id, status: column.id, operator: '操作员' },
+        type: 'TRANSITION_EDICT',
+        payload: { id: item.id, target: column.id, operator: '操作员' },
       });
     },
     collect: (monitor) => ({
@@ -258,7 +288,7 @@ function KanbanColumn({
 function EdictCard({ edict, onClick }: { edict: Edict; onClick: () => void }) {
   const [{ isDragging }, dragRef] = useDrag({
     type: 'EDICT',
-    item: { id: edict.id },
+    item: { id: edict.id, currentStatus: edict.status },
     collect: (monitor) => ({
       isDragging: monitor.isDragging(),
     }),
@@ -310,103 +340,86 @@ function WorkflowActions({ edict }: { edict: Edict }) {
   const { dispatch } = useWorkflow();
   const { t } = useTranslation();
 
+  // Get valid transitions from the state machine
+  const validTargets = getValidTransitions(edict.status);
+  const org = STATE_ORG_MAP[edict.status] || '—';
+
+  // For blocked edicts, show the unblock targets
+  // For pending confirm, show approve/reject
+  // For terminal, no actions
+  if (edict.pendingConfirm) {
+    return (
+      <div className="mt-4 flex w-full items-end justify-between gap-6 border-t border-[var(--color-accent-amber)]/30 pt-6">
+        <div className="flex-1">
+          <p className="mb-2 font-serif text-xs font-bold text-[var(--color-accent-amber)]">
+            待{edict.pendingConfirm.confirmBy}复核
+          </p>
+          <p className="mb-3 text-xs text-[var(--color-text-secondary)]">
+            请求流转至「{edict.pendingConfirm.targetState}」
+          </p>
+          <div className="flex gap-2">
+            <button
+              onClick={() =>
+                dispatch({
+                  type: 'CONFIRM_EDICT',
+                  payload: { id: edict.id, action: 'approve' },
+                })
+              }
+              className="rounded border border-[var(--color-accent-gold)]/50 bg-[var(--color-bg-secondary)] px-4 py-2 text-xs text-[var(--color-accent-gold)] hover:bg-[var(--color-accent-gold)]/20"
+            >
+              复核通过
+            </button>
+            <button
+              onClick={() =>
+                dispatch({
+                  type: 'CONFIRM_EDICT',
+                  payload: { id: edict.id, action: 'reject', reason: '需要修改' },
+                })
+              }
+              className="rounded border border-[var(--color-accent-vermillion)]/50 bg-[var(--color-bg-primary)] px-4 py-2 text-xs text-[var(--color-accent-vermillion)] hover:bg-[var(--color-accent-vermillion)]/20"
+            >
+              复核驳回
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="mt-4 flex w-full items-end justify-between gap-6 border-t border-[var(--color-accent-gold)]/20 pt-6">
       <div className="flex-1">
         <p className="mb-2 font-serif text-xs font-bold text-[var(--color-bamboo-brown)]">
-          {t('edict.workflowActionsLabel')}
+          {t('edict.workflowActionsLabel')} · 当前值守：{org}
         </p>
-        <div className="flex gap-2">
-          {edict.status === '待承旨' && (
-            <button
-              onClick={() =>
-                dispatch({
-                  type: 'UPDATE_EDICT_STATUS',
-                  payload: { id: edict.id, status: '待草拟', operator: '明堂' },
-                })
-              }
-              className="rounded border border-[var(--color-accent-gold)]/50 bg-[var(--color-bg-secondary)] px-4 py-2 text-xs text-[var(--color-accent-gold)] hover:bg-[var(--color-accent-gold)]/20"
-            >
-              承旨分拣
-            </button>
-          )}
-          {edict.status === '待草拟' && (
-            <button
-              onClick={() =>
-                dispatch({
-                  type: 'UPDATE_EDICT_STATUS',
-                  payload: { id: edict.id, status: '待审议', operator: '中书省' },
-                })
-              }
-              className="rounded border border-[var(--color-accent-gold)]/50 bg-[var(--color-bg-secondary)] px-4 py-2 text-xs text-[var(--color-accent-gold)] hover:bg-[var(--color-accent-gold)]/20"
-            >
-              提交草拟
-            </button>
-          )}
-          {edict.status === '待审议' && (
-            <>
+        <div className="flex flex-wrap gap-2">
+          {validTargets.map((target) => {
+            const label = TRANSITION_LABELS[`${edict.status}→${target}`] || `→ ${target}`;
+            const isDanger = target === '已撤销' || target === '待草拟';
+            const isBlock = target === '阻塞中';
+            return (
               <button
+                key={target}
                 onClick={() =>
                   dispatch({
-                    type: 'UPDATE_EDICT_STATUS',
-                    payload: { id: edict.id, status: '待派发', operator: '门下省' },
+                    type: 'TRANSITION_EDICT',
+                    payload: { id: edict.id, target, operator: org, remark: label },
                   })
                 }
-                className="rounded border border-[var(--color-accent-gold)]/50 bg-[var(--color-bg-secondary)] px-4 py-2 text-xs text-[var(--color-accent-gold)] hover:bg-[var(--color-accent-gold)]/20"
+                className={`rounded border px-4 py-2 text-xs transition-colors ${
+                  isDanger
+                    ? 'border-[var(--color-accent-vermillion)]/50 bg-[var(--color-bg-primary)] text-[var(--color-accent-vermillion)] hover:bg-[var(--color-accent-vermillion)]/20'
+                    : isBlock
+                      ? 'border-[var(--color-accent-amber)]/50 bg-[var(--color-bg-primary)] text-[var(--color-accent-amber)] hover:bg-[var(--color-accent-amber)]/20'
+                      : 'border-[var(--color-accent-gold)]/50 bg-[var(--color-bg-secondary)] text-[var(--color-accent-gold)] hover:bg-[var(--color-accent-gold)]/20'
+                }`}
               >
-                准奏
+                {label}
               </button>
-              <button
-                onClick={() =>
-                  dispatch({
-                    type: 'UPDATE_EDICT_STATUS',
-                    payload: { id: edict.id, status: '待草拟', operator: '门下省' },
-                  })
-                }
-                className="rounded border border-[var(--color-accent-vermillion)]/50 bg-[var(--color-bg-primary)] px-4 py-2 text-xs text-[var(--color-accent-vermillion)] hover:bg-[var(--color-accent-vermillion)]/20"
-              >
-                封驳
-              </button>
-            </>
-          )}
-          {edict.status === '待派发' && (
-            <button
-              onClick={() =>
-                dispatch({
-                  type: 'UPDATE_EDICT_STATUS',
-                  payload: { id: edict.id, status: '执行中', operator: '尚书省' },
-                })
-              }
-              className="rounded border border-[var(--color-accent-gold)]/50 bg-[var(--color-bg-secondary)] px-4 py-2 text-xs text-[var(--color-accent-gold)] hover:bg-[var(--color-accent-gold)]/20"
-            >
-              核发鱼符
-            </button>
-          )}
-          {edict.status === '执行中' && (
-            <button
-              onClick={() =>
-                dispatch({
-                  type: 'UPDATE_EDICT_STATUS',
-                  payload: { id: edict.id, status: '待回奏', operator: '六部' },
-                })
-              }
-              className="rounded border border-[var(--color-accent-gold)]/50 bg-[var(--color-bg-secondary)] px-4 py-2 text-xs text-[var(--color-accent-gold)] hover:bg-[var(--color-accent-gold)]/20"
-            >
-              办结
-            </button>
-          )}
-          {edict.status === '待回奏' && (
-            <button
-              onClick={() =>
-                dispatch({
-                  type: 'UPDATE_EDICT_STATUS',
-                  payload: { id: edict.id, status: '已办结', operator: '六部' },
-                })
-              }
-              className="rounded border border-[var(--color-accent-gold)]/50 bg-[var(--color-bg-secondary)] px-4 py-2 text-xs text-[var(--color-accent-gold)] hover:bg-[var(--color-accent-gold)]/20"
-            >
-              上呈回奏
-            </button>
+            );
+          })}
+          {validTargets.length === 0 && (
+            <span className="text-xs text-[var(--color-text-secondary)]">此状态无可用流转</span>
           )}
         </div>
       </div>
@@ -414,7 +427,7 @@ function WorkflowActions({ edict }: { edict: Edict }) {
         <ImperialSeal
           sealed={edict.seal}
           onSeal={() => dispatch({ type: 'SEAL_EDICT', payload: { id: edict.id } })}
-          disabled={edict.status === '已办结'}
+          disabled={edict.status === '已办结' || edict.status === '已撤销'}
         />
       </div>
     </div>
