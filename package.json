@@ -60,7 +60,7 @@
     "react-dnd-html5-backend": "16.0.1",
     "react-hook-form": "7.55.0",
     "react-resizable-panels": "2.1.7",
-    "react-router": "8.3.0",
+    "react-router": "8.4.0",
     "recharts": "2.15.2",
     "sonner": "2.0.3",
     "tailwind-merge": "3.2.0",
@@ -91,7 +91,7 @@
     "typescript-eslint": "^8.62.1",
     "vite": "6.4.3",
     "vite-plugin-node-polyfills": "^0.28.0",
-    "vitest": "^4.1.10"
+    "vitest": "^5.0.2"
   },
   "peerDependencies": {
     "react": "18.3.1",
