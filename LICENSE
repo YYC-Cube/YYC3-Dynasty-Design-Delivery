@@ -1,0 +1,34 @@
+MIT License
+
+Copyright (c) 2025 YanYuCloudCube Team <admin@0379.email>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+## 第三方归属
+
+本项目包含以下第三方开源组件，其原始许可证如下：
+
+- **shadcn/ui** — [MIT License](https://github.com/shadcn-ui/ui/blob/main/LICENSE.md) · 组件位于 `src/app/components/ui/`（小写文件名）
+- **Radix UI primitives** — [MIT License](https://github.com/radix-ui/primitives/blob/main/LICENSE) · 通过 npm 依赖
+- **Unsplash 图片素材** — [Unsplash License](https://unsplash.com/license) · 详见 `ATTRIBUTIONS.md`
+- **@yyc3/i18n-core + @yyc3/i18n-react** — 自定义商业许可 · vendored 于 `vendor/@yyc3/`
+
+包名 `@figma/my-make-file` 源于 Figma Make 导出约定，请勿修改。

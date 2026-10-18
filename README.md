@@ -18,10 +18,14 @@
 
 [![build](https://github.com/YYC-Cube/YYC3-Dynasty-Design-Delivery/actions/workflows/ci.yml/badge.svg)](https://github.com/YYC-Cube/YYC3-Dynasty-Design-Delivery/actions/workflows/ci.yml)
 [![deploy](https://github.com/YYC-Cube/YYC3-Dynasty-Design-Delivery/actions/workflows/deploy.yml/badge.svg)](https://github.com/YYC-Cube/YYC3-Dynasty-Design-Delivery/actions/workflows/deploy.yml)
-[![typescript](https://img.shields.io/badge/TypeScript-5.9.3-blue)]()
-[![vite](https://img.shields.io/badge/Vite-6.4.3-646cff)]()
-[![react](https://img.shields.io/badge/React-18.3.1-61dafb)]()
-[![tailwind](https://img.shields.io/badge/Tailwind-v4-38bdf8)]()
+[![license: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![typescript](https://img.shields.io/badge/TypeScript-5.9.3-blue)](https://www.typescriptlang.org/)
+[![vite](https://img.shields.io/badge/Vite-6.4.3-646cff)](https://vite.dev/)
+[![react](https://img.shields.io/badge/React-18.3.1-61dafb)](https://react.dev/)
+[![tailwind](https://img.shields.io/badge/Tailwind-v4-38bdf8)](https://tailwindcss.com/)
+[![tests](https://img.shields.io/badge/tests-107%20passing-10b981)](src/app/domain/__tests__)
+[![pnpm](https://img.shields.io/badge/pnpm-11-f69220)](https://pnpm.io/)
+[![i18n](https://img.shields.io/badge/i18n-zh--CN%20%7C%20en-8b5cf6)](src/i18n)
 
 ---
 
