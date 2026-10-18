@@ -1,5 +1,5 @@
-import * as _yyc3_i18n_core from '@yyc3/i18n-core';
-import { Locale } from '@yyc3/i18n-core';
+import * as _yyc3_i18n_core from '@yyc3/i18n-core/browser';
+import { Locale } from '@yyc3/i18n-core/browser';
 
 declare const DEFAULT_LOCALES: Locale[];
 interface I18nMiddlewareConfig {

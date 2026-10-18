@@ -3,7 +3,7 @@
  * @description Next.js App Router integration — middleware + server helpers
  */
 
-import type { Locale } from '@yyc3/i18n-core';
+import type { Locale } from '@yyc3/i18n-core/browser';
 
 export const DEFAULT_LOCALES: Locale[] = [
   'en',

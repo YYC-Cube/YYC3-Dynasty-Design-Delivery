@@ -113,6 +113,7 @@ Then `pnpm dev` and manually exercise the affected routes (including
 - `src/main.tsx` → renders `<App />` inside `React.StrictMode`.
 - `App.tsx` → `RouterProvider` with `createBrowserRouter` from `routes.tsx`.
 - `routes.tsx` defines a single `Root` parent with children:
+
   | Path                                                                        | Component         | Notes                                                                              |
   | --------------------------------------------------------------------------- | ----------------- | ---------------------------------------------------------------------------------- |
   | `/`                                                                         | `WelcomePage`     | Hero / role picker; nav hidden here                                                |
@@ -197,20 +198,32 @@ console.log(t('common.loading'));
 
 - Translation keys follow `<namespace>.<area>.<element>` (e.g. `nav.court`, `edict.boardTitle`, `placeholder.honors`).
 - The engine persists locale choice to `localStorage` key `yyc3.i18n.locale` — user choice survives reloads.
+- **zh-CN is the default**: the engine otherwise prefers the browser's `navigator` language (its own `DEFAULT_LOCALE` is `en`), so `src/i18n/index.ts` pre-seeds `yyc3.i18n.locale` to `zh-CN` **only when nothing is stored** — an explicit choice is never overwritten.
+- **Gotcha — the engine discards newly registered maps on startup (verified still present in 3.0.2)**: the `I18nEngine` constructor resolves the initial locale asynchronously and, for any locale other than `en`, assigns its own lazily-loaded built-in map over `translations[locale]` (`I18nEngine#setLocale`; the `!translations[locale]` guard is evaluated synchronously _before_ post-construction registration can run), wiping out the project maps registered right after construction. Left unchecked, every `zh-CN` lookup falls back to `en` and the UI renders English even though the active locale is `zh-CN`. `src/i18n/index.ts` therefore re-asserts the project maps inside an `i18nEngine.subscribe(...)` callback — `setLocale` calls `notify()` only _after_ it has settled. Keep that re-registration when editing this file. (Upstream-tracker candidate: constructor-time lazy loading should not clobber user-registered maps, or `I18nEngineConfig` should accept a `translations` injection.)
 - Available locales are defined in `AVAILABLE_LOCALES` (currently `zh-CN` and `en`).
 - The language switcher lives in `Navigation.tsx` (Globe icon dropdown, right side).
 - **Adding a new UI string**: add the key to BOTH `src/i18n/locales/zh-CN.ts` AND `src/i18n/locales/en.ts`, then use `t('key')` in the component.
 - **Cultural names** (三省六部, 天堂, etc.) are kept as-is in Chinese; the English translations preserve the metaphor (e.g. "Edict" not "Task Order", "Secretariat" not "Drafting Department").
 
-**Vite + Node polyfills:**
-`@yyc3/i18n-core`'s main entry bundles Node.js builtins (`crypto`, `path`, `fs`, `timers/promises`) for its server-side modules (AI providers, MCP server, security utils). The `vite-plugin-node-polyfills` plugin in `vite.config.ts` shims these for the browser so the client-side i18n engine works without pulling in a Node runtime.
+**Browser-safe i18n entry (important):**
+Client code must import the engine from the **browser subpath**:
+
+```ts
+import { I18nEngine, type Locale } from '@yyc3/i18n-core/browser';
+```
+
+`@yyc3/i18n-core`'s **root** entry (`'.'`) bundles its server-side modules (AI providers, MCP server, security utils) and statically imports Node.js builtins (`crypto`, `path`, `fs`, `timers/promises`). Importing the root entry from client code drags that whole subscription in — historically forcing `vite-plugin-node-polyfills` to shim ~40 browserify packages into a **411 kB `vendor-polyfills` chunk** on every first load.
+
+The official **`'./browser'` subpath** (shipped by the npm package since 2.4.2, declared in its `exports` map) exports only the Node-free modules (engine, cache, plugins, formatter, detector, RTL, ICU) and adds **zero** Node builtins to the client graph. **No Node polyfills are configured at all** — `vite-plugin-node-polyfills` was removed together with its dependency, so no `process` / `global` / `Buffer` shim is injected anywhere in the bundle. (The browser entry reads `process.env.LANGUAGE/LANG/LC_ALL/LC_MESSAGES` inside `detectSystemLocale`, but that function is tree-shaken away; residual `process` references in dependencies are all guarded by `typeof process !== 'undefined'`.)
+
+> Do **not** re-point client imports at `@yyc3/i18n-core` (root) — not even `import type`. The root `index.d.ts` and `browser.d.ts` are two _separate_ declarations of `I18nEngine` (nominal via `private state`), so mixing subpaths produces TS2322. All type imports must use `@yyc3/i18n-core/browser` too.
 
 **Dependencies:**
 
-- `@yyc3/i18n-core` — linked via `file:../YYC3-i18n-Core`
-- `@yyc3/i18n-react` — linked via `file:../YYC3-i18n-Core/packages/i18n-react`
+- `@yyc3/i18n-core` — `^3.0.2` from the **public npm registry** (switched from the old vendored `file:` copy; `./browser` entry ships officially since 2.4.2). Upstream source: `github.com/YYC-Cube/YYC3-i18n-Core`.
+- `@yyc3/i18n-react` — `file:./vendor/@yyc3/i18n-react` (still vendored; **not published** to npm as of 3.0.2). Its `dist/index.d.ts` + `dist/next.d.ts` (and `src/`) were patched to type-import from `@yyc3/i18n-core/browser` — see the subpath note above; if you ever rebuild this package, keep that change.
 
-Both are local workspace links; when the upstream packages are published to npm, switch to versioned ranges.
+`@yyc3/i18n-react` is hard-linked into `.pnpm/` by pnpm — adding a new file under `vendor/@yyc3/i18n-react/` requires `pnpm install` before it resolves from `node_modules` (edits to _existing_ files propagate through the hard link immediately).
 
 ---
 

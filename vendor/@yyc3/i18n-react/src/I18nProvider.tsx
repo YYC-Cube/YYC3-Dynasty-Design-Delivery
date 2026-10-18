@@ -3,7 +3,7 @@
  * @description React Context Provider for @yyc3/i18n-core
  */
 
-import { I18nEngine, type Locale } from '@yyc3/i18n-core';
+import { I18nEngine, type Locale } from '@yyc3/i18n-core/browser';
 import {
   createContext,
   useContext,

@@ -5,7 +5,7 @@
 
 import { useCallback } from 'react';
 import { useI18nContext } from './I18nProvider';
-import type { Locale } from '@yyc3/i18n-core';
+import type { Locale } from '@yyc3/i18n-core/browser';
 
 export interface UseTranslationReturn {
   /** Translate a key with optional ICU parameters */

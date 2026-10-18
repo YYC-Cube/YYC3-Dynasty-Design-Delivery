@@ -1,6 +1,6 @@
 import * as react from 'react';
 import { ReactNode } from 'react';
-import { I18nEngine, Locale } from '@yyc3/i18n-core';
+import { I18nEngine, Locale } from '@yyc3/i18n-core/browser';
 
 interface I18nContextValue {
     engine: I18nEngine;
