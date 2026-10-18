@@ -54,10 +54,9 @@ Then `pnpm dev` and manually exercise the affected routes (including
 
 ### pnpm workspace constraints (`pnpm-workspace.yaml`)
 
-- `minimumReleaseAge: 10080` (7 days) — newly published packages are refused.
-- `minimumReleaseAgeExclude: [postcss]` — narrow, documented exemption: every postcss release fixing GHSA-6g55-p6wh-862q is still inside the cooling window, and shipping a known-vulnerable build is the worse trade-off. **Remove it once postcss 8.5.23+ has matured.**
+- `minimumReleaseAge: 10080` (7 days) — newly published packages are refused. **No exclusions** (`minimumReleaseAgeExclude` must stay absent): when a security fix is still inside the cooling window, pin to the newest _mature_ patched release instead (that is why security overrides below may lag the absolute latest).
 - `overrides` carries two groups: React type pins (see §7.4) and **security overrides** for transitive dev tooling (`brace-expansion`, `postcss`, `js-yaml`, `nanoid`, `tar`, `browserslist`, `baseline-browser-mapping`, `source-map-js`). Each is pinned to the first patched release _within its existing major line_ so no consumer gets a breaking bump. After touching them run `pnpm audit` (must print `No known vulnerabilities found`), then the full CI chain.
-- Changing `overrides` invalidates the lockfile — run `pnpm install --no-frozen-lockfile` (pnpm 12 defaults to frozen and will abort with `ERR_PNPM_LOCKFILE_CONFIG_MISMATCH`).
+- Touching `overrides` / `minimumReleaseAge` invalidates the lockfile — run `pnpm install --no-frozen-lockfile`. If the policy check then rejects an entry already in the lockfile (e.g. a now-too-new version you just un-excluded), restore the previous lockfile, re-add the exclusion **temporarily**, run `pnpm install --lockfile-only`, then drop the exclusion again and confirm with `pnpm install --frozen-lockfile`. Do **not** run `pnpm clean --lockfile`: it re-resolves the whole tree and drifts hundreds of unrelated packages.
 - `allowBuilds` denies `@tailwindcss/oxide` and `esbuild` (they ship prebuilt binaries).
 - `supportedArchitectures`: **Linux x64 / arm64 / glibc only**. If you're on macOS/apple‑silicon, native optional deps may need the explicit `@esbuild/darwin-arm64` / `@rollup/rollup-darwin-arm64` devDeps that are already pinned in `package.json` — don't remove them.
 
