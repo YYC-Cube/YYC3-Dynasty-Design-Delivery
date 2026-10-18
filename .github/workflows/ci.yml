@@ -5,6 +5,10 @@ on:
     branches: [main, master]
   pull_request:
     branches: [main, master]
+  # Weekly security sweep: push/PR runs cannot detect advisories published
+  # *after* a dependency was locked, so re-audit the existing tree every Monday.
+  schedule:
+    - cron: '0 2 * * 1'
   # Allow manual runs from the Actions tab.
   workflow_dispatch:
 
@@ -18,18 +22,18 @@ permissions:
 
 jobs:
   quality:
-    name: typecheck · lint · build
+    name: typecheck · lint · audit · test · build
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
 
+      # No `version` input: pnpm/action-setup reads package.json#packageManager,
+      # so CI runs the exact pnpm that produced pnpm-lock.yaml.
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
-        with:
-          version: 11
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -42,8 +46,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Typecheck
+      - name: Typecheck (app)
         run: pnpm typecheck
+
+      # vite.config.ts belongs to its own project (tsconfig.node.json) and is
+      # NOT covered by `tsc -p tsconfig.json`. Without this step a missing
+      # @types/node or a broken config import would only surface during build.
+      - name: Typecheck (node config)
+        run: pnpm typecheck:node
 
       - name: Lint
         run: pnpm lint
@@ -53,6 +63,11 @@ jobs:
 
       - name: Circular dependency scan
         run: pnpm madge
+
+      # Fails on high/critical advisories in the *locked* tree. Complements
+      # Dependabot: this also runs on the weekly schedule.
+      - name: Security audit
+        run: pnpm security:audit
 
       - name: Unit tests
         run: pnpm test

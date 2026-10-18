@@ -2,6 +2,7 @@
   "name": "@figma/my-make-file",
   "private": true,
   "version": "0.0.1",
+  "packageManager": "pnpm@12.14.0",
   "type": "module",
   "scripts": {
     "dev": "vite --port 3133 --host",
@@ -12,6 +13,8 @@
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,css,md,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,css,md,yml,yaml}\"",
     "typecheck": "tsc --noEmit -p tsconfig.json",
+    "typecheck:node": "tsc -p tsconfig.node.json --noEmit",
+    "security:audit": "pnpm audit --audit-level high",
     "madge": "madge --circular --extensions ts,tsx src/",
     "test": "vitest run",
     "test:watch": "vitest",

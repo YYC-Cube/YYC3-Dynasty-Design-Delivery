@@ -35,18 +35,21 @@ pnpm build        # production build to dist/
 pnpm preview      # preview built dist/
 
 # Quality gates (mirrors CI — see .github/workflows/ci.yml)
-pnpm typecheck    # tsc --noEmit, must be 0 errors
-pnpm lint         # eslint ., must be 0 errors / 0 warnings
-pnpm format       # prettier --write (auto-fix)
-pnpm format:check # prettier --check (CI mode, no writes)
-pnpm madge        # circular-dependency scan, must report none
+pnpm typecheck      # tsc --noEmit -p tsconfig.json (src/), must be 0 errors
+pnpm typecheck:node # tsc -p tsconfig.node.json --noEmit (vite.config.ts)
+pnpm lint           # eslint ., must be 0 errors / 0 warnings
+pnpm format         # prettier --write (auto-fix)
+pnpm format:check   # prettier --check (CI mode, no writes)
+pnpm madge          # circular-dependency scan, must report none
+pnpm security:audit # pnpm audit --audit-level high, must report none
+pnpm test           # vitest run (107 tests)
 ```
 
-There is **no `test` script** yet. To validate changes locally, run the same
-sequence CI does:
+To validate changes locally, run the same sequence CI does:
 
 ```bash
-pnpm typecheck && pnpm lint && pnpm format:check && pnpm madge && pnpm build
+pnpm typecheck && pnpm typecheck:node && pnpm lint && pnpm format:check \
+  && pnpm madge && pnpm security:audit && pnpm test && pnpm build
 ```
 
 Then `pnpm dev` and manually exercise the affected routes (including
@@ -392,17 +395,19 @@ The codebase previously used `imperial-*` Tailwind classes (e.g. `text-imperial-
 
 ### 7.12 CI gate (`.github/workflows/ci.yml`)
 
-Every PR to `main`/`master` must pass these in order: `typecheck → lint → format:check → madge → build`. The workflow:
+Every PR to `main`/`master` must pass these in order: `typecheck → typecheck:node → lint → format:check → madge → security:audit → test → build`. The workflow:
 
 - Runs on `ubuntu-latest` (matches `pnpm-workspace.yaml#supportedArchitectures`).
-- Uses pnpm 11 + Node 22 (matches local).
+- Uses **the pnpm pinned in `package.json#packageManager`** (no `version` input on `pnpm/action-setup`, so CI and local cannot drift) + Node 22.
 - Installs with `--frozen-lockfile` — **never commit a `pnpm-lock.yaml` that's out of sync with `package.json`**.
+- Runs `typecheck:node` separately because `tsc -p tsconfig.json` only includes `src/`; `vite.config.ts` belongs to the referenced `tsconfig.node.json` project and would otherwise never be type-checked.
+- Runs `security:audit` (`pnpm audit --audit-level high`) as a hard gate, and re-runs on a **weekly schedule** (`cron: 0 2 * * 1`) because push/PR runs cannot see advisories published after a dependency was locked.
 - Uploads `dist/` as an artifact (7-day retention) even on failure, for deploy debugging.
 
 To run the exact CI sequence locally before pushing:
 
 ```bash
-pnpm typecheck && pnpm lint && pnpm format:check && pnpm madge && pnpm build
+pnpm typecheck && pnpm typecheck:node && pnpm lint && pnpm format:check && pnpm madge && pnpm security:audit && pnpm test && pnpm build
 ```
 
 ### 7.13 Mocked backend
