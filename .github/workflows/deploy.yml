@@ -28,10 +28,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      # No `version` input: pnpm/action-setup reads package.json#packageManager,
-      # so CI runs the exact pnpm that produced pnpm-lock.yaml.
+      # Pin the exact pnpm that produced pnpm-lock.yaml (lockfileVersion 9.0).
+      # Keep in sync with the maintainer's local `pnpm -v`.
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
+        with:
+          version: 12.14.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v7

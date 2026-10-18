@@ -398,7 +398,7 @@ The codebase previously used `imperial-*` Tailwind classes (e.g. `text-imperial-
 Every PR to `main`/`master` must pass these in order: `typecheck → typecheck:node → lint → format:check → madge → security:audit → test → build`. The workflow:
 
 - Runs on `ubuntu-latest` (matches `pnpm-workspace.yaml#supportedArchitectures`).
-- Uses **the pnpm pinned in `package.json#packageManager`** (no `version` input on `pnpm/action-setup`, so CI and local cannot drift) + Node 22.
+- Uses **pnpm 12.14.0** (pinned in both workflows, matching the maintainer's local `pnpm -v` and the lockfile's `lockfileVersion: '9.0'`) + Node 22. Do **not** add a `packageManager` field to `package.json` — pnpm 12 then writes `packageManagerDependencies` (`@pnpm/exe.*`) into `pnpm-lock.yaml` and rewrites it, which produced a duplicated `lockfileVersion` document when regenerated.
 - Installs with `--frozen-lockfile` — **never commit a `pnpm-lock.yaml` that's out of sync with `package.json`**.
 - Runs `typecheck:node` separately because `tsc -p tsconfig.json` only includes `src/`; `vite.config.ts` belongs to the referenced `tsconfig.node.json` project and would otherwise never be type-checked.
 - Runs `security:audit` (`pnpm audit --audit-level high`) as a hard gate, and re-runs on a **weekly schedule** (`cron: 0 2 * * 1`) because push/PR runs cannot see advisories published after a dependency was locked.
