@@ -1,8 +1,46 @@
-import { defineConfig } from 'vite';
-import path from 'path';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import path from 'path';
+import { defineConfig } from 'vite';
+
+// ── Manual chunk groups ──────────────────────────────────────────────────
+// Third-party code is isolated into dedicated vendor chunks so the entry
+// (`index`) chunk stays small and libraries can be cached across deploys.
+// Recharts is split further so its bulky d3 layer (`vendor-d3`, pulled in
+// through `victory-vendor`) is not bundled together with the charting core
+// (`vendor-recharts`).
+
+function packageName(id: string): string {
+  const tail = id.split('node_modules/').pop() ?? '';
+  const segments = tail.split('/');
+  return tail.startsWith('@') ? `${segments[0]}/${segments[1]}` : segments[0];
+}
+
+function manualVendorChunk(id: string): string | undefined {
+  // @yyc3 packages are linked from ./vendor, not node_modules.
+  if (id.includes('/vendor/@yyc3/')) return 'vendor-i18n';
+  if (!id.includes('node_modules')) return undefined;
+
+  const pkg = packageName(id);
+
+  if (/^(react|react-dom|react-router|scheduler|react-is)$/.test(pkg)) return 'vendor-react';
+  if (/^(@radix-ui|@floating-ui)\//.test(pkg)) return 'vendor-radix';
+  if (pkg === 'victory-vendor' || /^d3-/.test(pkg)) return 'vendor-d3';
+  if (/^(recharts|recharts-scale|react-smooth|decimal\.js-light|lodash)$/.test(pkg))
+    return 'vendor-recharts';
+  if (/^(motion|framer-motion|motion-dom|motion-utils)$/.test(pkg)) return 'vendor-motion';
+  if (/^react-dnd($|-html5-backend$)/.test(pkg)) return 'vendor-dnd';
+  if (pkg === 'lucide-react') return 'vendor-icons';
+  if (/^(react-hook-form|react-day-picker|date-fns|input-otp)$/.test(pkg)) return 'vendor-forms';
+  if (/^(sonner|cmdk|vaul|embla-carousel-react|react-resizable-panels|next-themes)$/.test(pkg))
+    return 'vendor-ui';
+  if (/^@yyc3\//.test(pkg)) return 'vendor-i18n';
+
+  // Everything else stays under Rollup's default chunking so no artificial
+  // cross-chunk cycles (and no catch-all bucket that would pull lazy-only deps
+  // into the eager graph) are introduced.
+  return undefined;
+}
 
 export default defineConfig({
   // Custom domain (dynasty.yyc3.top via public/CNAME) → site is served at the
@@ -15,15 +53,14 @@ export default defineConfig({
     // Tailwind is not being actively used – do not remove them
     react(),
     tailwindcss(),
-    // @yyc3/i18n-core ships a single bundle that imports Node.js builtins
-    // (crypto, path, fs, timers/promises) for its server-side modules
-    // (AI providers, MCP server, security utils). In the browser these are
-    // polyfilled so the i18n engine itself (translations, cache, ICU, RTL)
-    // works without pulling in a Node runtime.
-    nodePolyfills({
-      include: ['crypto', 'path', 'fs', 'timers/promises'],
-      globals: { Buffer: true, global: true, process: true },
-    }),
+    // No Node.js polyfills are configured. Client code imports only the
+    // browser-safe entry of @yyc3/i18n-core (`@yyc3/i18n-core/browser`), whose
+    // module graph never touches Node builtins (crypto/path/fs/timers); the
+    // server-side entry (AI providers, MCP server, security utils) is
+    // intentionally never imported from client code. Consequently no `process`
+    // / `global` / `Buffer` shim is injected anywhere in the bundle. Should a
+    // dependency ever require one, reinstall `vite-plugin-node-polyfills` and
+    // re-add `nodePolyfills()` here.
   ],
   resolve: {
     alias: {
@@ -54,24 +91,11 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        // Split large vendor libraries into separate chunks for better
-        // caching and parallel download. Route-level lazy loading already
-        // splits by route; this further isolates heavy shared deps.
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router'],
-          'vendor-radix': [
-            '@radix-ui/react-dialog',
-            '@radix-ui/react-dropdown-menu',
-            '@radix-ui/react-popover',
-            '@radix-ui/react-select',
-            '@radix-ui/react-tabs',
-            '@radix-ui/react-tooltip',
-            '@radix-ui/react-accordion',
-          ],
-          'vendor-recharts': ['recharts'],
-          'vendor-dnd': ['react-dnd', 'react-dnd-html5-backend'],
-          'vendor-motion': ['motion'],
-        },
+        // Function form gives precise control over which vendor package lands
+        // in which chunk (see manualVendorChunk above). Route-level lazy
+        // loading already splits by route; this further isolates heavy shared
+        // deps so the entry chunk stays lean.
+        manualChunks: manualVendorChunk,
       },
     },
   },
